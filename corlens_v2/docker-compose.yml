@@ -30,6 +30,21 @@ services:
       timeout: 5s
       retries: 5
 
+  # One-shot: creates/updates the DB schema, then exits. Apps wait for it
+  # (depends_on: service_completed_successfully) so a fresh clone boots with
+  # tables already in place. `prisma db push` is idempotent.
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/migrate.Dockerfile
+    container_name: corlens-v2-migrate
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://corlens:corlens_dev@postgres:5432/corlens
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   gateway:
     image: caddy:2
     container_name: corlens-v2-gateway
@@ -71,6 +86,8 @@ services:
     ports:
       - "3001:3001"
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -131,6 +148,8 @@ services:
     ports:
       - "3003:3003"
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     healthcheck:
@@ -161,6 +180,8 @@ services:
     ports:
       - "3004:3004"
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -194,6 +215,8 @@ services:
     ports:
       - "3005:3005"
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -226,6 +249,8 @@ services:
     ports:
       - "3006:3006"
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       corridor:

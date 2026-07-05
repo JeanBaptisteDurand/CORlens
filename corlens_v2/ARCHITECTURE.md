@@ -88,11 +88,30 @@ apps/<svc>/src/
 
 ## How to run
 
+Fresh clone, one command. The one-shot `migrate` service creates the DB
+schema (`prisma db push`, idempotent) before the apps start, so there is
+nothing to set up by hand:
+
 ```sh
-docker compose up -d                       # whole stack
+docker compose up -d                       # builds images on first run
 curl http://localhost:8080/health          # gateway up
 curl http://localhost:8080/api/corridors   # corridor catalog
 open http://localhost:8080/                # SPA
+```
+
+No `.env` is required — dev defaults are baked into `docker-compose.yml`.
+For the AI features (chat, embeddings), provide an OpenAI key:
+
+```sh
+cp .env.example .env                       # then set OPENAI_API_KEY
+docker compose up -d
+```
+
+To push the schema from the host instead of the `migrate` service (dev):
+
+```sh
+cp packages/db/.env.example packages/db/.env
+pnpm --filter @corlens/db prisma:push
 ```
 
 Per-service dev:
