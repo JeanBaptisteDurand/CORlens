@@ -63,74 +63,12 @@ Trust Lines, AMM Pools, DEX Orderbooks, path_find, Escrow, Signer Lists, XLS-73 
 
 ---
 
-## Local Setup
+## Run it (Docker, one command)
 
-### Prerequisites
-
-- **Node.js** ≥ 20
-- **pnpm** ≥ 9 (`corepack enable && corepack prepare pnpm@9 --activate`)
-- **Docker** (for Postgres + Redis — or bring your own)
-- An **OpenAI API key** (used for the Safe Path agent reasoning + corridor RAG embeddings)
-- *(optional but recommended)* A **QuickNode XRPL Mainnet** endpoint — public XRPL nodes work for read-only browsing, but the agent's pathfinding bursts to ~50 req/s and benefits from a dedicated endpoint
-
-### Quick start
-
-```bash
-git clone https://github.com/JeanBaptisteDurand/PBW_2026.git
-cd PBW_2026/corlens
-pnpm install
-
-# Configure environment
-cp .env.example .env
-# Open .env and at minimum set OPENAI_API_KEY
-
-# Start Postgres (with pgvector) + Redis
-docker run -d --name corlens-pg \
-  -e POSTGRES_USER=corlens -e POSTGRES_PASSWORD=corlens_dev -e POSTGRES_DB=corlens \
-  -p 5432:5432 ankane/pgvector:latest
-docker run -d --name corlens-redis -p 6379:6379 redis:7
-
-# Apply schema (Prisma) and start the dev servers
-pnpm db:generate
-pnpm db:push
-pnpm dev
-```
-
-Once the dev servers are up:
-
-| Service | URL |
-| --- | --- |
-| Web app | http://localhost:5173 |
-| API | http://localhost:3001 |
-| Prisma Studio | `pnpm db:studio` → http://localhost:5555 |
-
-### Environment variables
-
-All env vars live in [`corlens/.env.example`](./corlens/.env.example). Copy that file to `.env` and fill in the ones marked **required** below.
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `DATABASE_URL` | yes | Postgres connection string. The database must have the `pgvector` extension (the `ankane/pgvector` image above ships it pre-installed) |
-| `OPENAI_API_KEY` | yes | OpenAI key — powers the Safe Path agent (GPT-4o-mini) and the corridor / entity RAG embeddings |
-| `JWT_SECRET` | yes | Secret used to sign the session JWT issued after Crossmark wallet authentication |
-| `XRPL_PRIMARY_RPC` | recommended | XRPL Mainnet WSS endpoint used for all read calls (account state, AMM, orderbook, trust lines). A working public node is fine for low-traffic dev |
-| `XRPL_PATHFIND_RPC` | recommended | Dedicated XRPL endpoint for `ripple_path_find` (can equal `XRPL_PRIMARY_RPC` in dev) |
-| `REDIS_URL` | no | Defaults to `redis://localhost:6379`. Used by BullMQ to queue audit crawls |
-| `PORT` | no | API port (default `3001`) |
-| `NODE_ENV` | no | `development` (default) / `production` / `test` |
-| `XRPL_TESTNET_RPC` | no | XRPL Testnet WSS endpoint — only required if you exercise the premium subscription payment flow locally |
-| `XRPL_PAYMENT_WALLET_ADDRESS` | no | Receiving wallet address for premium subscription payments (testnet) |
-| `XRPL_PAYMENT_WALLET_SECRET` | no | Seed of the receiving wallet (testnet) |
-| `XRPL_DEMO_WALLET_SECRET` | no | Seed of a funded testnet wallet used by the in-app "pay for premium" demo button. Generate one at https://faucet.altnet.rippletest.net |
-
----
-
-## Run corlens_v2 (Docker, one command)
-
-`corlens_v2/` is the current "exploded monolith" architecture. From the
-**repo root**, a fresh clone runs with a single command — the DB schema is
-created automatically on first boot (the one-shot `migrate` service) and every
-service ships working dev defaults:
+The codebase is `corlens_v2/` — an "exploded monolith" (6 services + gateway,
+one Postgres, one Redis). From the **repo root**, a fresh clone runs with a
+single command — the DB schema is created automatically on first boot (the
+one-shot `migrate` service) and every service ships working dev defaults:
 
 ```bash
 docker compose up                # builds + starts the whole stack
@@ -178,13 +116,23 @@ XRPL is the backbone of $15B/year in ODL cross-border payments serving 700M peop
 ## Project Structure
 
 ```
-corlens/
+corlens_v2/
   apps/
-    server/       Backend API (Express + Prisma + BullMQ)
-    web/          Frontend (React + Vite)
-    mcp-server/   MCP server for Claude integration
+    identity/      Auth, wallet login, XRP/RLUSD payments
+    market-data/   XRPL RPC, live orderbook depth, caching
+    ai-service/    OpenAI chat + embeddings, RAG
+    corridor/      Corridor catalog + XRPL settlement classification
+    path/          Safe-path BFS + split routing
+    agent/         Multi-tool Safe Path AI agent
+    web/           Frontend (React + Vite)
+    mcp-server/    MCP server for Claude integration
   packages/
-    core/         Shared types and utilities
+    contracts/     Zod request/response schemas (service boundaries)
+    db/            Prisma schema (split per-service Postgres schemas)
+    events/        Event bus (HTTP fan-out)
+    clients/       Typed inter-service HTTP clients
+    env/           Env parsing / validation
+  docker-compose.yml · Caddyfile · ARCHITECTURE.md
 ```
 
 ---
@@ -223,7 +171,7 @@ Contributions are welcome. If you want to hack on a specific package, please ope
 
 ## Safe Path AI Agent -- Deep Dive
 
-The Safe Path Agent ([safePathAgent.ts](corlens/apps/server/src/ai/safePathAgent.ts), ~1,000 lines) is an autonomous multi-tool AI agent that evaluates cross-border payment routes in real time. It streams every tool call and reasoning step via SSE so the frontend can display the agent's thought process live.
+The Safe Path Agent (the [`agent` service](corlens_v2/apps/agent) — a 9-phase pipeline under [`src/services/phases/`](corlens_v2/apps/agent/src/services/phases)) is an autonomous multi-tool AI agent that evaluates cross-border payment routes in real time. It streams every tool call and reasoning step via SSE so the frontend can display the agent's thought process live.
 
 ### 9-Phase Execution Pipeline
 

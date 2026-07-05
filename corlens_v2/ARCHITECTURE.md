@@ -88,26 +88,23 @@ apps/<svc>/src/
 
 ## How to run
 
-Fresh clone, one command — run from the **repo root** (there is a root
-`docker-compose.yml` that includes this one). The one-shot `migrate`
-service creates the DB schema (`prisma db push`, idempotent) before the
-apps start, so there is nothing to set up by hand:
+Fresh clone, one command — from the **repo root** (a root
+`docker-compose.yml` includes this stack). The one-shot `migrate` service
+creates the DB schema (`prisma db push`, idempotent) before the apps start,
+so there is nothing to set up by hand:
 
 ```sh
-cd <repo-root>
-docker compose up -d                       # builds images on first run
-curl http://localhost:8080/health          # gateway up
-curl http://localhost:8080/api/corridors   # corridor catalog
-open http://localhost:8080/                # SPA
+docker compose up                          # builds images on first run
+# → gateway at http://localhost:8080  (SPA + API)
 ```
 
 No `.env` is required — dev defaults are baked into `docker-compose.yml`.
-Secrets live in a single root `.env`. For the AI features (chat,
-embeddings), provide an OpenAI key:
+Secrets are centralized in a single root `.env`; for the AI features (chat,
+embeddings) set your OpenAI key there:
 
 ```sh
-cp .env.example .env                       # at the repo root, set OPENAI_API_KEY
-docker compose up -d
+cp .env.example .env                       # root .env, then set OPENAI_API_KEY
+docker compose up
 ```
 
 To push the schema from the host instead of the `migrate` service (dev):
