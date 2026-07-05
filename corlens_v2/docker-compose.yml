@@ -1,0 +1,285 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: corlens-v2-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: corlens
+      POSTGRES_PASSWORD: corlens_dev
+      POSTGRES_DB: corlens
+    ports:
+      - "5435:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/init-pgvector.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U corlens"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: corlens-v2-redis
+    restart: unless-stopped
+    ports:
+      - "6381:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # One-shot: creates/updates the DB schema, then exits. Apps wait for it
+  # (depends_on: service_completed_successfully) so a fresh clone boots with
+  # tables already in place. `prisma db push` is idempotent.
+  migrate:
+    build:
+      context: .
+      dockerfile: docker/migrate.Dockerfile
+    container_name: corlens-v2-migrate
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://corlens:corlens_dev@postgres:5432/corlens
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  gateway:
+    image: caddy:2
+    container_name: corlens-v2-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  identity:
+    build:
+      context: .
+      dockerfile: apps/identity/Dockerfile
+    container_name: corlens-v2-identity
+    restart: unless-stopped
+    environment:
+      PORT: "3001"
+      HOST: "0.0.0.0"
+      DATABASE_URL: postgresql://corlens:corlens_dev@postgres:5432/corlens
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me-must-be-at-least-32-chars}
+      INTERNAL_HMAC_SECRET: ${INTERNAL_HMAC_SECRET:-dev-internal-hmac-secret-do-not-use-in-prod-aaaaaaa}
+      XRPL_PAYMENT_WALLET_ADDRESS: ${XRPL_PAYMENT_WALLET_ADDRESS:-rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh}
+      XRPL_TESTNET_RPC: wss://s.altnet.rippletest.net:51233
+      XRPL_DEMO_WALLET_SECRET: ${XRPL_DEMO_WALLET_SECRET:-}
+      CHALLENGE_TTL_SECONDS: "300"
+      PAYMENT_EXPIRY_MINUTES: "15"
+      XRP_PRICE: "10"
+      RLUSD_PRICE: "5"
+      AI_SERVICE_BASE_URL: http://ai-service:3003
+      AGENT_BASE_URL: http://agent:3006
+    ports:
+      - "3001:3001"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:3001/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  market-data:
+    build:
+      context: .
+      dockerfile: apps/market-data/Dockerfile
+    container_name: corlens-v2-market-data
+    restart: unless-stopped
+    environment:
+      PORT: "3002"
+      HOST: "0.0.0.0"
+      REDIS_URL: redis://redis:6379
+      XRPL_PRIMARY_RPC: ${XRPL_PRIMARY_RPC:-wss://xrplcluster.com}
+      XRPL_PATHFIND_RPC: ${XRPL_PATHFIND_RPC:-wss://xrplcluster.com}
+      XRPL_RATE_LIMIT_INTERVAL_MS: "20"
+      PARTNER_DEPTH_TTL_SECONDS: "60"
+      ACCOUNT_CACHE_TTL_SECONDS: "60"
+      BOOK_CACHE_TTL_SECONDS: "10"
+      PREWARM_ENABLED: "true"
+      PREWARM_CRON: "0 * * * *"
+    ports:
+      - "3002:3002"
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:3002/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  ai-service:
+    build:
+      context: .
+      dockerfile: apps/ai-service/Dockerfile
+    container_name: corlens-v2-ai-service
+    restart: unless-stopped
+    environment:
+      PORT: "3003"
+      HOST: "0.0.0.0"
+      DATABASE_URL: postgresql://corlens:corlens_dev@postgres:5432/corlens
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-sk-placeholder-replace-me}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      DEFAULT_CHAT_MODEL: gpt-4o-mini
+      DEFAULT_EMBEDDING_MODEL: text-embedding-3-small
+      WEB_SEARCH_CACHE_HOURS: "24"
+      INTERNAL_HMAC_SECRET: ${INTERNAL_HMAC_SECRET:-dev-internal-hmac-secret-do-not-use-in-prod-aaaaaaa}
+    ports:
+      - "3003:3003"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:3003/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  corridor:
+    build:
+      context: .
+      dockerfile: apps/corridor/Dockerfile
+    container_name: corlens-v2-corridor
+    restart: unless-stopped
+    environment:
+      PORT: "3004"
+      HOST: "0.0.0.0"
+      DATABASE_URL: postgresql://corlens:corlens_dev@postgres:5432/corlens
+      REDIS_URL: redis://redis:6379
+      MARKET_DATA_BASE_URL: http://market-data:3002
+      AI_SERVICE_BASE_URL: http://ai-service:3003
+      INTERNAL_HMAC_SECRET: ${INTERNAL_HMAC_SECRET:-dev-internal-hmac-secret-do-not-use-in-prod-aaaaaaa}
+      SCAN_CONCURRENCY: "4"
+      SCAN_TIMEOUT_MS: "20000"
+      REFRESH_CRON: "0 * * * *"
+      REFRESH_ENABLED: "false"
+    ports:
+      - "3004:3004"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:3004/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  path:
+    build:
+      context: .
+      dockerfile: apps/path/Dockerfile
+    container_name: corlens-v2-path
+    restart: unless-stopped
+    environment:
+      PORT: "3005"
+      HOST: "0.0.0.0"
+      DATABASE_URL: postgresql://corlens:corlens_dev@postgres:5432/corlens
+      REDIS_URL: redis://redis:6379
+      MARKET_DATA_BASE_URL: http://market-data:3002
+      AI_SERVICE_BASE_URL: http://ai-service:3003
+      INTERNAL_HMAC_SECRET: ${INTERNAL_HMAC_SECRET:-dev-internal-hmac-secret-do-not-use-in-prod-aaaaaaa}
+      BFS_CONCURRENCY: "4"
+      BFS_MAX_NODES: "800"
+      BFS_TIMEOUT_MS: "45000"
+      WORKER_ENABLED: "true"
+      RAG_TOP_K: "5"
+    ports:
+      - "3005:3005"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:3005/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  agent:
+    build:
+      context: .
+      dockerfile: apps/agent/Dockerfile
+    container_name: corlens-v2-agent
+    restart: unless-stopped
+    environment:
+      PORT: "3006"
+      HOST: "0.0.0.0"
+      DATABASE_URL: postgresql://corlens:corlens_dev@postgres:5432/corlens
+      CORRIDOR_BASE_URL: http://corridor:3004
+      PATH_BASE_URL: http://path:3005
+      MARKET_DATA_BASE_URL: http://market-data:3002
+      AI_SERVICE_BASE_URL: http://ai-service:3003
+      IDENTITY_BASE_URL: http://identity:3001
+      INTERNAL_HMAC_SECRET: ${INTERNAL_HMAC_SECRET:-dev-internal-hmac-secret-do-not-use-in-prod-aaaaaaa}
+      MAX_PHASE_TIMEOUT_MS: "60000"
+      RAG_TOP_K: "5"
+    ports:
+      - "3006:3006"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      corridor:
+        condition: service_healthy
+      path:
+        condition: service_healthy
+      ai-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1:3006/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: corlens-v2-web
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

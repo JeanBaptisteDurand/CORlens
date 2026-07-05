@@ -1,0 +1,5 @@
+# Repo-root entrypoint for the corlens_v2 stack. Run `docker compose up`
+# from here — secrets are read from the root .env (copy .env.example → .env).
+# The actual service definitions live in corlens_v2/docker-compose.yml.
+include:
+  - corlens_v2/docker-compose.yml

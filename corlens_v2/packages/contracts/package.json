@@ -1,0 +1,45 @@
+{
+  "name": "@corlens/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./dist/market-data.js": {
+      "types": "./dist/market-data.d.ts",
+      "default": "./dist/market-data.js"
+    },
+    "./dist/ai.js": {
+      "types": "./dist/ai.d.ts",
+      "default": "./dist/ai.js"
+    },
+    "./dist/corridor.js": {
+      "types": "./dist/corridor.d.ts",
+      "default": "./dist/corridor.js"
+    },
+    "./dist/path.js": {
+      "types": "./dist/path.d.ts",
+      "default": "./dist/path.js"
+    },
+    "./dist/agent.js": {
+      "types": "./dist/agent.d.ts",
+      "default": "./dist/agent.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "zod": "3.23.8"
+  },
+  "devDependencies": {
+    "typescript": "5.7.2"
+  }
+}
