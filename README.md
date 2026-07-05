@@ -60,32 +60,12 @@ Trust Lines, AMM Pools, DEX Orderbooks, path_find, Escrow, Signer Lists, XLS-73 
 
 ---
 
-## Local Setup
+## Run it (Docker, one command)
 
-```bash
-cd corlens
-pnpm install
-
-# Set up environment
-cp .env.example .env
-# Edit .env with your DATABASE_URL, OPENAI_API_KEY, etc.
-
-# Start Docker services (Postgres + Redis)
-docker compose up -d
-
-# Generate Prisma client and start dev servers
-pnpm db:generate
-pnpm dev
-```
-
----
-
-## Run corlens_v2 (Docker, one command)
-
-`corlens_v2/` is the current "exploded monolith" architecture. From the
-**repo root**, a fresh clone runs with a single command — the DB schema is
-created automatically on first boot (the one-shot `migrate` service) and every
-service ships working dev defaults:
+The codebase is `corlens_v2/` — an "exploded monolith" (6 services + gateway,
+one Postgres, one Redis). From the **repo root**, a fresh clone runs with a
+single command — the DB schema is created automatically on first boot (the
+one-shot `migrate` service) and every service ships working dev defaults:
 
 ```bash
 docker compose up                # builds + starts the whole stack
@@ -133,13 +113,23 @@ XRPL is the backbone of $15B/year in ODL cross-border payments serving 700M peop
 ## Project Structure
 
 ```
-corlens/
+corlens_v2/
   apps/
-    server/       Backend API (Express + Prisma + BullMQ)
-    web/          Frontend (React + Vite)
-    mcp-server/   MCP server for Claude integration
+    identity/      Auth, wallet login, XRP/RLUSD payments
+    market-data/   XRPL RPC, live orderbook depth, caching
+    ai-service/    OpenAI chat + embeddings, RAG
+    corridor/      Corridor catalog + XRPL settlement classification
+    path/          Safe-path BFS + split routing
+    agent/         Multi-tool Safe Path AI agent
+    web/           Frontend (React + Vite)
+    mcp-server/    MCP server for Claude integration
   packages/
-    core/         Shared types and utilities
+    contracts/     Zod request/response schemas (service boundaries)
+    db/            Prisma schema (split per-service Postgres schemas)
+    events/        Event bus (HTTP fan-out)
+    clients/       Typed inter-service HTTP clients
+    env/           Env parsing / validation
+  docker-compose.yml · Caddyfile · ARCHITECTURE.md
 ```
 
 ---
