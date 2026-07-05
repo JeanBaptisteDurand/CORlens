@@ -80,6 +80,30 @@ pnpm dev
 
 ---
 
+## Run corlens_v2 (Docker, one command)
+
+`corlens_v2/` is the current "exploded monolith" architecture. From the
+**repo root**, a fresh clone runs with a single command — the DB schema is
+created automatically on first boot (the one-shot `migrate` service) and every
+service ships working dev defaults:
+
+```bash
+docker compose up                # builds + starts the whole stack
+# → gateway at http://localhost:8080  (SPA + API)
+```
+
+No `.env` is required to boot. Secrets are centralized in a single root `.env`;
+the only one worth setting is your OpenAI key, for the AI features:
+
+```bash
+cp .env.example .env             # at the repo root, then set OPENAI_API_KEY
+docker compose up
+```
+
+See [`corlens_v2/ARCHITECTURE.md`](corlens_v2/ARCHITECTURE.md) for the design.
+
+---
+
 ## Problem & Solution
 
 **Problem:**
