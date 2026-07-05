@@ -4,7 +4,7 @@
 
 [![Demo Video](https://img.shields.io/badge/Demo-YouTube-red?logo=youtube)](https://youtu.be/JYIxANpQtms)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](#local-setup)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](#run-it-docker-one-command)
 [![pnpm](https://img.shields.io/badge/pnpm-%3E%3D9-f69220?logo=pnpm&logoColor=white)](https://pnpm.io/)
 
 CORLens is a full-stack platform for mapping, understanding, and auditing the infrastructure behind cross-border payments on the XRP Ledger.
@@ -108,7 +108,7 @@ XRPL is the backbone of $15B/year in ODL cross-border payments serving 700M peop
 - **Project Name:** CORLens
 - **Track:** Make Waves + Impact Finance + Quicknode bounty (1,000 EUR) + Pixel Meets Chain (1,000 EUR)
 - **Network:** XRP Ledger Mainnet
-- **Repository:** https://github.com/JeanBaptisteDurand/PBW_2026
+- **Repository:** https://github.com/JeanBaptisteDurand/CORlens
 - **Live Demo:** https://cor-lens.xyz
 
 ---
