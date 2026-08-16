@@ -29,9 +29,9 @@ export function NodeDetailPanel({ node, onClose }: NodeDetailPanelProps) {
   const borderColor = NODE_COLORS[node.kind] ?? "var(--token-colors-border-default)";
 
   return (
-    <div className="absolute right-0 top-0 z-20 h-full w-[var(--token-layout-nodeDetailWidth)] overflow-y-auto border-l border-slate-800 bg-slate-950">
+    <div className="absolute right-0 top-0 z-20 h-full w-[var(--token-layout-nodeDetailWidth)] overflow-y-auto border-l border-[color:var(--app-glass-panel-border)] bg-app-bg-secondary">
       <div
-        className="flex items-start justify-between border-b-2 bg-slate-900 px-4 py-3"
+        className="flex items-start justify-between border-b-2 bg-[#0B0F1C] px-4 py-3"
         style={{ borderColor }}
       >
         <div>
@@ -53,7 +53,7 @@ export function NodeDetailPanel({ node, onClose }: NodeDetailPanelProps) {
       </div>
 
       {node.riskFlags.length > 0 && (
-        <div className="border-b border-slate-800 px-4 py-3">
+        <div className="border-b border-[color:var(--app-glass-panel-border)] px-4 py-3">
           <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-600">
             Risk Flags ({node.riskFlags.length})
           </div>
@@ -62,7 +62,7 @@ export function NodeDetailPanel({ node, onClose }: NodeDetailPanelProps) {
             return (
               <div
                 key={`${flag.flag}-${idx}`}
-                className={`mb-1.5 rounded-md border bg-slate-900 px-2 py-1.5 ${classes.border}`}
+                className={`mb-1.5 border bg-[#0B0F1C] px-2 py-1.5 ${classes.border}`}
               >
                 <div className={`mb-0.5 text-[11px] font-semibold ${classes.text}`}>
                   {flag.flag}
@@ -75,11 +75,11 @@ export function NodeDetailPanel({ node, onClose }: NodeDetailPanelProps) {
       )}
 
       {node.aiExplanation && (
-        <div className="border-b border-slate-800 px-4 py-3">
+        <div className="border-b border-[color:var(--app-glass-panel-border)] px-4 py-3">
           <div className="mb-2 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-slate-600">
             <span className="text-xs">&#x1F916;</span> AI Analysis
           </div>
-          <div className="rounded-lg border border-indigo-500/25 bg-app-bg-secondary p-3 text-xs leading-relaxed text-slate-300">
+          <div className="border border-[color:var(--page-accent-400)]/25 bg-[#0B0F1C] p-3 text-xs leading-relaxed text-slate-300">
             {node.aiExplanation}
           </div>
         </div>
@@ -89,7 +89,7 @@ export function NodeDetailPanel({ node, onClose }: NodeDetailPanelProps) {
         <div className="mb-2 text-[10px] font-bold uppercase tracking-wide text-slate-600">
           Node Data
         </div>
-        <pre className="overflow-auto whitespace-pre-wrap break-all rounded-md border border-slate-800 bg-slate-900 p-2.5 text-[11px] text-slate-500">
+        <pre className="overflow-auto whitespace-pre-wrap break-all border border-[color:var(--app-glass-panel-border)] bg-[#0B0F1C] p-2.5 text-[11px] text-slate-500">
           {JSON.stringify(node.data, null, 2)}
         </pre>
       </div>

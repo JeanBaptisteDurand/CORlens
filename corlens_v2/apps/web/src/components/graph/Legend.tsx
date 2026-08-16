@@ -97,13 +97,11 @@ export function Legend({
         top: 16,
         left: 16,
         zIndex: 10,
-        background: "rgba(2, 6, 23, 0.92)",
-        border: "1px solid #1e293b",
-        borderRadius: 8,
+        background: "rgba(7, 11, 20, 0.92)",
+        border: "1px solid var(--app-glass-panel-border)",
         padding: collapsed ? "8px 12px" : "10px 14px",
-        backdropFilter: "blur(8px)",
         fontSize: 11,
-        color: "#94a3b8",
+        color: "#8A93A6",
         maxWidth: 230,
         maxHeight: collapsed ? undefined : "calc(100vh - 180px)",
         overflowY: collapsed ? "visible" : "auto",
@@ -126,7 +124,7 @@ export function Legend({
           style={{
             fontSize: 9,
             fontWeight: 700,
-            color: "#cbd5e1",
+            color: "#F4F6FA",
             letterSpacing: 1,
             textTransform: "uppercase",
             background: "none",
@@ -192,16 +190,15 @@ export function Legend({
                   />
                   <span
                     style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: "50%",
+                      width: 9,
+                      height: 9,
                       background: NODE_COLORS[kind],
                       flexShrink: 0,
                     }}
                   />
                   <span style={{ fontSize: 10, flex: 1 }}>{NODE_LABELS[kind]}</span>
                   {count !== undefined && (
-                    <span style={{ fontSize: 9, color: "#475569" }}>{count}</span>
+                    <span style={{ fontSize: 9, color: "#5A6483" }}>{count}</span>
                   )}
                 </label>
               );
@@ -209,7 +206,7 @@ export function Legend({
           </div>
 
           {/* Divider */}
-          <div style={{ borderTop: "1px solid #1e293b", marginBottom: 8 }} />
+          <div style={{ borderTop: "1px solid var(--app-glass-panel-border)", marginBottom: 8 }} />
 
           {/* Edge types */}
           <div style={sectionHeaderStyle}>Edge Types</div>
@@ -242,12 +239,11 @@ export function Legend({
                       height: 2,
                       background: EDGE_COLORS[kind],
                       flexShrink: 0,
-                      borderRadius: 1,
                     }}
                   />
                   <span style={{ fontSize: 10, flex: 1 }}>{EDGE_LABELS[kind]}</span>
                   {count !== undefined && (
-                    <span style={{ fontSize: 9, color: "#475569" }}>{count}</span>
+                    <span style={{ fontSize: 9, color: "#5A6483" }}>{count}</span>
                   )}
                 </label>
               );
@@ -263,7 +259,7 @@ const sectionHeaderStyle: React.CSSProperties = {
   fontSize: 9,
   fontWeight: 700,
   letterSpacing: 1,
-  color: "#475569",
+  color: "#5A6483",
   marginBottom: 6,
   textTransform: "uppercase",
 };
@@ -271,10 +267,9 @@ const sectionHeaderStyle: React.CSSProperties = {
 const filterButtonStyle: React.CSSProperties = {
   fontSize: 9,
   fontWeight: 600,
-  color: "#cbd5e1",
-  background: "#1e293b",
-  border: "1px solid #334155",
-  borderRadius: 4,
+  color: "#F4F6FA",
+  background: "rgba(244,246,250,0.06)",
+  border: "1px solid var(--app-glass-panel-border)",
   padding: "2px 6px",
   cursor: "pointer",
 };

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useLocation, useOutlet } from "react-router-dom";
-import { GlobalStarfield } from "./GlobalStarfield.js";
 import { Navbar } from "./Navbar.js";
 
 const ROUTE_TRANSITION_MS = 560;
@@ -14,7 +13,6 @@ export function Layout(): JSX.Element {
 
   const [displayedOutlet, setDisplayedOutlet] = useState(outlet);
   const [displayedLocationKey, setDisplayedLocationKey] = useState(locationKey);
-  const [displayedPathname, setDisplayedPathname] = useState(location.pathname);
   const [transitionStage, setTransitionStage] = useState<TransitionStage>("idle");
 
   useEffect(() => {
@@ -24,12 +22,11 @@ export function Layout(): JSX.Element {
     const timeoutId = window.setTimeout(() => {
       setDisplayedOutlet(outlet);
       setDisplayedLocationKey(locationKey);
-      setDisplayedPathname(location.pathname);
       setTransitionStage("enter");
     }, ROUTE_TRANSITION_MS);
 
     return () => window.clearTimeout(timeoutId);
-  }, [displayedLocationKey, location.pathname, locationKey, outlet]);
+  }, [displayedLocationKey, locationKey, outlet]);
 
   useEffect(() => {
     if (transitionStage !== "enter") return;
@@ -37,21 +34,10 @@ export function Layout(): JSX.Element {
     return () => window.clearTimeout(timeoutId);
   }, [transitionStage]);
 
-  const isLandingRoute = displayedPathname === "/landing" || displayedPathname === "/";
-  const pageTheme = getPageTheme(displayedPathname);
-  const layoutClassName = [
-    "relative isolate min-h-screen overflow-x-hidden",
-    isLandingRoute ? "bg-slate-950" : `app-theme app-theme-${pageTheme}`,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return (
-    <div className={layoutClassName} data-page-theme={pageTheme}>
-      {!isLandingRoute && <GlobalStarfield />}
-      {!isLandingRoute && <div className="global-background-glass" aria-hidden="true" />}
-      {!isLandingRoute && <Navbar />}
-      <main className={isLandingRoute ? "relative z-10" : "relative z-10 pt-14"}>
+    <div className="relative isolate min-h-screen overflow-x-hidden bg-slate-950">
+      <Navbar />
+      <main className="relative z-10 pt-14">
         <div
           className={[
             "route-transition",
@@ -65,17 +51,4 @@ export function Layout(): JSX.Element {
       </main>
     </div>
   );
-}
-
-function getPageTheme(pathname: string): "home" | "analyze" | "corridors" | "safe-path" {
-  if (
-    pathname.startsWith("/analyze") ||
-    pathname.startsWith("/graph") ||
-    pathname.startsWith("/chat")
-  ) {
-    return "analyze";
-  }
-  if (pathname.startsWith("/corridors")) return "corridors";
-  if (pathname.startsWith("/safe-path")) return "safe-path";
-  return "home";
 }

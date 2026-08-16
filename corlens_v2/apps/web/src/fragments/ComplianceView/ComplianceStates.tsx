@@ -1,10 +1,5 @@
 import { Button } from "../../components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 
 interface ErrorStateProps {
   message: string;
@@ -25,10 +20,7 @@ interface EmptyStateProps {
   isGenerating: boolean;
 }
 
-export function ComplianceEmptyState({
-  onGenerate,
-  isGenerating,
-}: EmptyStateProps) {
+export function ComplianceEmptyState({ onGenerate, isGenerating }: EmptyStateProps) {
   return (
     <Card>
       <CardHeader>
@@ -36,9 +28,9 @@ export function ComplianceEmptyState({
       </CardHeader>
       <CardContent>
         <p className="mb-4 text-sm leading-relaxed text-slate-400">
-          Click "Generate Report" to run AML analysis on this entity&apos;s
-          knowledge graph. The report includes risk assessment, entity
-          breakdown, concentration analysis, and actionable recommendations.
+          Click "Generate Report" to run AML analysis on this entity&apos;s knowledge graph. The
+          report includes risk assessment, entity breakdown, concentration analysis, and actionable
+          recommendations.
         </p>
         <Button onClick={onGenerate} disabled={isGenerating}>
           {isGenerating ? "Generating…" : "Generate Report"}

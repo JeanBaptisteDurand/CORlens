@@ -20,15 +20,14 @@ export default function AccountNode({ data, selected }: AccountNodeProps) {
   return (
     <div
       style={{
-        border: `1.5px solid ${selected ? "#6b7280" : `${borderColor}70`}`,
-        borderRadius: 8,
-        background: "#0f172a",
+        border: `1.5px solid ${selected ? "var(--page-accent-400)" : `${borderColor}70`}`,
+        background: "#0B0F1C",
         minWidth: 130,
         maxWidth: 160,
         fontSize: 11,
-        color: "#e2e8f0",
+        color: "#E4E7F0",
         position: "relative",
-        boxShadow: selected ? `0 0 10px ${borderColor}50` : "none",
+        boxShadow: selected ? "0 0 10px rgba(110,163,255,0.5)" : "none",
       }}
     >
       <Handle type="target" position={Position.Top} style={{ background: borderColor }} />
@@ -40,7 +39,6 @@ export default function AccountNode({ data, selected }: AccountNodeProps) {
         style={{
           background: `${borderColor}15`,
           borderBottom: `1px solid ${borderColor}25`,
-          borderRadius: "6px 6px 0 0",
           padding: "4px 8px",
           display: "flex",
           justifyContent: "space-between",
@@ -54,11 +52,10 @@ export default function AccountNode({ data, selected }: AccountNodeProps) {
           <span
             style={{
               fontSize: 8,
-              color: "#0ea5e9",
+              color: "#8FB4FF",
               fontWeight: 600,
-              background: "#0ea5e920",
+              background: "rgba(143,180,255,0.14)",
               padding: "1px 4px",
-              borderRadius: 4,
             }}
           >
             {tag}
@@ -69,14 +66,14 @@ export default function AccountNode({ data, selected }: AccountNodeProps) {
       {/* Body */}
       <div style={{ padding: "6px 8px", display: "flex", flexDirection: "column", gap: 3 }}>
         {displayLabel && (
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#f8fafc" }}>{displayLabel}</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#F4F6FA" }}>{displayLabel}</div>
         )}
 
         <div
           style={{
             fontFamily: "monospace",
             fontSize: 10,
-            color: "#64748b",
+            color: "#7C8AA0",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -85,7 +82,7 @@ export default function AccountNode({ data, selected }: AccountNodeProps) {
           {address ? shortenAddress(address, 7) : label}
         </div>
 
-        {domain && <div style={{ color: "#94a3b8", fontSize: 9 }}>{domain}</div>}
+        {domain && <div style={{ color: "#8A93A6", fontSize: 9 }}>{domain}</div>}
       </div>
 
       <Handle type="source" position={Position.Bottom} style={{ background: borderColor }} />

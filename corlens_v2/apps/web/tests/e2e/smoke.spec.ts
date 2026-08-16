@@ -6,8 +6,7 @@ import { expect, test } from "@playwright/test";
 // specs below.
 
 const ROUTES: Array<{ path: string; expect: RegExp }> = [
-  { path: "/", expect: /corlens|landing/i },
-  { path: "/landing", expect: /corlens|landing/i },
+  { path: "/", expect: /Corridor Intelligence|corelens/i },
   { path: "/home", expect: /Corridor Intelligence|corelens/i },
   { path: "/corridors", expect: /corelens/i },
   { path: "/analyze", expect: /Entity Audit|corelens/i },

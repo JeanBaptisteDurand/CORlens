@@ -24,7 +24,7 @@ export function SelectFilter({
         data-testid={testId}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded border border-slate-800 bg-slate-900/60 px-2 py-1.5 text-sm text-white focus:border-xrp-500 focus:outline-none"
+        className="border border-[color:var(--app-glass-panel-border)] bg-slate-900/60 px-2 py-1.5 text-sm text-white focus:border-xrp-400 focus:outline-none"
       >
         {options.map((option) => (
           <option key={option} value={option}>

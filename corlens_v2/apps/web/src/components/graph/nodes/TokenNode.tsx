@@ -13,15 +13,14 @@ export default function TokenNode({ data, selected }: TokenNodeProps) {
   return (
     <div
       style={{
-        border: `1.5px solid ${selected ? "#f59e0b" : `${borderColor}80`}`,
-        borderRadius: 8,
-        background: "#0f172a",
+        border: `1.5px solid ${selected ? "var(--page-accent-400)" : `${borderColor}80`}`,
+        background: "#0B0F1C",
         maxWidth: 160,
         minWidth: 120,
         fontSize: 11,
-        color: "#e2e8f0",
+        color: "#E4E7F0",
         position: "relative",
-        boxShadow: selected ? `0 0 12px ${borderColor}50` : "none",
+        boxShadow: selected ? "0 0 12px rgba(110,163,255,0.5)" : "none",
       }}
     >
       <Handle type="target" position={Position.Top} style={{ background: borderColor }} />
@@ -33,7 +32,6 @@ export default function TokenNode({ data, selected }: TokenNodeProps) {
         style={{
           background: `${borderColor}20`,
           borderBottom: `1px solid ${borderColor}30`,
-          borderRadius: "6px 6px 0 0",
           padding: "4px 8px",
           display: "flex",
           alignItems: "center",
@@ -51,7 +49,7 @@ export default function TokenNode({ data, selected }: TokenNodeProps) {
           style={{
             fontSize: 12,
             fontWeight: 700,
-            color: "#f8fafc",
+            color: "#F4F6FA",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
@@ -61,15 +59,15 @@ export default function TokenNode({ data, selected }: TokenNodeProps) {
         </div>
 
         {nodeData.totalSupply && (
-          <div style={{ color: "#94a3b8", fontSize: 10 }}>
-            Supply: <span style={{ color: "#e2e8f0" }}>{formatNumber(nodeData.totalSupply)}</span>
+          <div style={{ color: "#8A93A6", fontSize: 10 }}>
+            Supply: <span style={{ color: "#E4E7F0" }}>{formatNumber(nodeData.totalSupply)}</span>
           </div>
         )}
 
         {typeof nodeData.trustLineCount === "number" && (
-          <div style={{ color: "#94a3b8", fontSize: 10 }}>
+          <div style={{ color: "#8A93A6", fontSize: 10 }}>
             Trust lines:{" "}
-            <span style={{ color: "#e2e8f0" }}>{formatNumber(nodeData.trustLineCount)}</span>
+            <span style={{ color: "#E4E7F0" }}>{formatNumber(nodeData.trustLineCount)}</span>
           </div>
         )}
       </div>

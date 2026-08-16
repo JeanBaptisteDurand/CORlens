@@ -59,7 +59,7 @@ export function PartnerDepthBadge({
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 text-[11px] text-slate-500 italic">
+      <div className="border border-slate-800 bg-slate-950/40 px-4 py-3 text-[11px] text-slate-500 italic">
         Fetching live orderbook from {actorLabel}…
       </div>
     );
@@ -67,7 +67,7 @@ export function PartnerDepthBadge({
 
   if (error || !snap) {
     return (
-      <div className="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 text-[11px] text-slate-500 italic">
+      <div className="border border-slate-800 bg-slate-950/40 px-4 py-3 text-[11px] text-slate-500 italic">
         {error ?? "No depth snapshot available."}
       </div>
     );
@@ -75,12 +75,12 @@ export function PartnerDepthBadge({
 
   return (
     <div
-      className="rounded-lg border border-emerald-500/30 bg-gradient-to-br from-emerald-500/10 to-transparent px-4 py-3"
+      className="border border-emerald-500/30 bg-emerald-500/10 px-4 py-3"
       data-testid="partner-depth-badge"
     >
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.9)] animate-pulse" />
+          <span className="inline-block h-1.5 w-1.5 bg-emerald-400 animate-pulse" />
           <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-300">
             Live · Measured, not assumed
           </span>
@@ -100,9 +100,7 @@ export function PartnerDepthBadge({
       </div>
       <div className="grid grid-cols-2 gap-3 text-[11px]">
         <div>
-          <div className="text-[9px] uppercase tracking-wide text-slate-500">
-            Top bid
-          </div>
+          <div className="text-[9px] uppercase tracking-wide text-slate-500">Top bid</div>
           <div className="font-mono text-emerald-300">
             {snap.topBid
               ? `${Number(snap.topBid.price).toLocaleString(undefined, { maximumFractionDigits: 4 })} ${quoteSymbol}`
@@ -117,9 +115,7 @@ export function PartnerDepthBadge({
           </div>
         </div>
         <div>
-          <div className="text-[9px] uppercase tracking-wide text-slate-500">
-            Top ask
-          </div>
+          <div className="text-[9px] uppercase tracking-wide text-slate-500">Top ask</div>
           <div className="font-mono text-amber-300">
             {snap.topAsk
               ? `${Number(snap.topAsk.price).toLocaleString(undefined, { maximumFractionDigits: 4 })} ${quoteSymbol}`
@@ -137,14 +133,11 @@ export function PartnerDepthBadge({
       {snap.spreadBps != null && (
         <div className="mt-2 pt-2 border-t border-emerald-500/15 flex items-center justify-between text-[10px]">
           <span className="text-slate-500 uppercase tracking-wide">Spread</span>
-          <span className="font-mono text-white">
-            {snap.spreadBps.toFixed(1)} bps
-          </span>
+          <span className="font-mono text-white">{snap.spreadBps.toFixed(1)} bps</span>
         </div>
       )}
       <div className="mt-1 text-[9px] font-mono text-slate-600">
-        Fetched {new Date(snap.fetchedAt).toLocaleTimeString()} · TTL{" "}
-        {snap.ttlSeconds}s
+        Fetched {new Date(snap.fetchedAt).toLocaleTimeString()} · TTL {snap.ttlSeconds}s
       </div>
     </div>
   );

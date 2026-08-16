@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { CorridorChatSource } from "../../lib/core-types.js";
 import { api } from "../../api/index.js";
+import type { CorridorChatSource } from "../../lib/core-types.js";
 
 // ─── Floating Corridor Chat Bubble ─────────────────────────────────────────
 // Lives bottom-right on every corridor page. Carries the current corridor
@@ -94,9 +94,19 @@ export function CorridorChatBubble({ corridorId }: Props) {
         <button
           data-testid="chat-bubble-open"
           onClick={() => setOpen(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 rounded-full border border-xrp-500/60 bg-slate-950/95 px-5 py-3 text-sm font-semibold text-xrp-300 shadow-lg shadow-xrp-900/40 backdrop-blur transition hover:scale-105 hover:border-xrp-400"
+          className="btn-primary-themed fixed bottom-6 right-6 z-40 flex items-center gap-2 border border-[color:var(--page-accent-400)] px-5 py-3 text-sm font-semibold text-white transition hover:scale-105"
         >
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg
+            className="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
           <span>Ask corridors</span>
         </button>
       )}
@@ -104,7 +114,7 @@ export function CorridorChatBubble({ corridorId }: Props) {
       {open && (
         <div
           data-testid="chat-bubble-panel"
-          className="fixed bottom-6 right-6 z-40 flex h-[540px] w-[380px] max-w-[92vw] flex-col rounded-xl border border-slate-700 bg-slate-950/98 shadow-2xl shadow-xrp-900/40 backdrop-blur"
+          className="fixed bottom-6 right-6 z-40 flex h-[540px] w-[380px] max-w-[92vw] flex-col border border-[color:var(--app-glass-panel-border)] bg-[#070B14]"
         >
           {/* Header */}
           <div className="flex items-center justify-between gap-2 border-b border-slate-800 px-4 py-3">
@@ -133,9 +143,8 @@ export function CorridorChatBubble({ corridorId }: Props) {
             {messages.length === 0 && (
               <div className="space-y-3">
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Ask anything about the corridors. I ground my answers in the
-                  live scan data and AI commentary — I'll tell you when a
-                  corridor doesn't exist instead of guessing.
+                  Ask anything about the corridors. I ground my answers in the live scan data and AI
+                  commentary — I'll tell you when a corridor doesn't exist instead of guessing.
                 </p>
                 <div className="space-y-1.5">
                   {suggestions.map((s) => (
@@ -143,7 +152,7 @@ export function CorridorChatBubble({ corridorId }: Props) {
                       key={s}
                       onClick={() => send(s)}
                       data-testid={`suggestion-${s.slice(0, 20)}`}
-                      className="w-full text-left rounded border border-slate-800 bg-slate-900/50 px-3 py-1.5 text-[11px] text-slate-300 hover:border-xrp-500 hover:text-white transition"
+                      className="w-full text-left border border-slate-800 bg-slate-900/50 px-3 py-1.5 text-[11px] text-slate-300 hover:border-xrp-400 hover:text-white transition"
                     >
                       {s}
                     </button>
@@ -154,15 +163,11 @@ export function CorridorChatBubble({ corridorId }: Props) {
             {messages.map((m, i) => (
               <div
                 key={i}
-                className={
-                  m.role === "user"
-                    ? "flex justify-end"
-                    : "flex justify-start"
-                }
+                className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
               >
                 <div
                   data-testid={`chat-msg-${m.role}`}
-                  className={`max-w-[85%] rounded-lg px-3 py-2 text-[13px] leading-relaxed whitespace-pre-line ${
+                  className={`max-w-[85%] px-3 py-2 text-[13px] leading-relaxed whitespace-pre-line ${
                     m.role === "user"
                       ? "bg-xrp-500/20 border border-xrp-500/40 text-white"
                       : "bg-slate-900/80 border border-slate-800 text-slate-200"
@@ -193,14 +198,12 @@ export function CorridorChatBubble({ corridorId }: Props) {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="rounded-lg bg-slate-900/80 border border-slate-800 px-3 py-2 text-[13px] text-slate-400 italic">
+                <div className="bg-slate-900/80 border border-slate-800 px-3 py-2 text-[13px] text-slate-400 italic">
                   thinking…
                 </div>
               </div>
             )}
-            {error && (
-              <div className="text-[11px] text-red-400">{error}</div>
-            )}
+            {error && <div className="text-[11px] text-red-400">{error}</div>}
             <div ref={endRef} />
           </div>
 
@@ -217,19 +220,15 @@ export function CorridorChatBubble({ corridorId }: Props) {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={
-                corridorId
-                  ? "Ask about this corridor…"
-                  : "Ask about any corridor…"
-              }
+              placeholder={corridorId ? "Ask about this corridor…" : "Ask about any corridor…"}
               disabled={loading}
-              className="flex-1 bg-slate-900/60 border border-slate-800 rounded px-3 py-1.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-xrp-500 disabled:opacity-50"
+              className="flex-1 bg-slate-900/60 border border-slate-800 px-3 py-1.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-xrp-400 disabled:opacity-50"
             />
             <button
               type="submit"
               data-testid="chat-send"
               disabled={loading || !input.trim()}
-              className="rounded bg-xrp-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-xrp-400 disabled:opacity-40 disabled:cursor-not-allowed transition"
+              className="bg-xrp-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-xrp-400 disabled:opacity-40 disabled:cursor-not-allowed transition"
             >
               Send
             </button>

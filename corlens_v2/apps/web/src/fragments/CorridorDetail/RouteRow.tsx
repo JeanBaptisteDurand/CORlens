@@ -11,9 +11,7 @@ export function RouteRow({ route, selected, onSelect }: RouteRowProps) {
   const liqStr = (() => {
     const parts: string[] = [];
     if (route.liquidity?.xrpLeg) {
-      parts.push(
-        `xrp ${route.liquidity.xrpLeg.toIouOffers}/${route.liquidity.xrpLeg.toXrpOffers}`,
-      );
+      parts.push(`xrp ${route.liquidity.xrpLeg.toIouOffers}/${route.liquidity.xrpLeg.toXrpOffers}`);
     }
     if (route.liquidity?.directBook) {
       parts.push(
@@ -35,9 +33,7 @@ export function RouteRow({ route, selected, onSelect }: RouteRowProps) {
     >
       <td className="py-2 pr-3">
         <div className="text-white">{route.label}</div>
-        <div className="font-mono text-[10px] text-slate-600">
-          {route.routeId}
-        </div>
+        <div className="font-mono text-[10px] text-slate-600">{route.routeId}</div>
       </td>
       <td className="py-2 pr-3">
         <StatusBadge status={route.status} />
@@ -46,11 +42,9 @@ export function RouteRow({ route, selected, onSelect }: RouteRowProps) {
       <td className="py-2 pr-3 text-right">
         <span
           className={
-            route.recommendedRiskScore != null &&
-            route.recommendedRiskScore > 20
+            route.recommendedRiskScore != null && route.recommendedRiskScore > 20
               ? "text-red-400"
-              : route.recommendedRiskScore != null &&
-                  route.recommendedRiskScore > 0
+              : route.recommendedRiskScore != null && route.recommendedRiskScore > 0
                 ? "text-amber-400"
                 : "text-emerald-400"
           }
@@ -58,9 +52,7 @@ export function RouteRow({ route, selected, onSelect }: RouteRowProps) {
           {route.recommendedRiskScore ?? "—"}
         </span>
       </td>
-      <td className="py-2 pr-3 font-mono text-[11px] text-slate-400">
-        {liqStr}
-      </td>
+      <td className="py-2 pr-3 font-mono text-[11px] text-slate-400">{liqStr}</td>
       <td className="py-2 text-[11px]">
         {route.isWinner ? (
           <span className="font-semibold text-emerald-400">★ winner</span>

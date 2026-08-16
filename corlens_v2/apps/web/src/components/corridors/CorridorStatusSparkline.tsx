@@ -28,10 +28,7 @@ export interface CorridorStatusSparklineProps {
   days?: number;
 }
 
-export function CorridorStatusSparkline({
-  corridorId,
-  days = 30,
-}: CorridorStatusSparklineProps) {
+export function CorridorStatusSparkline({ corridorId, days = 30 }: CorridorStatusSparklineProps) {
   const [events, setEvents] = useState<StatusEvent[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -84,7 +81,7 @@ export function CorridorStatusSparkline({
       const counts = dayCounts[cell.day];
       if (!counts) continue;
       // Pick status with highest count; tie-break: GREEN > AMBER > RED
-      let best: string = "UNKNOWN";
+      let best = "UNKNOWN";
       let bestCount = 0;
       for (const [status, count] of Object.entries(counts)) {
         if (count > bestCount || (count === bestCount && status === "GREEN")) {
@@ -110,7 +107,7 @@ export function CorridorStatusSparkline({
 
   return (
     <div
-      className="rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3"
+      className="border border-slate-800 bg-slate-950/40 px-4 py-3"
       data-testid="corridor-status-sparkline"
     >
       <div className="flex items-center justify-between mb-2">
@@ -120,12 +117,8 @@ export function CorridorStatusSparkline({
         {!loading && !error && events && events.length > 0 && (
           <div className="text-[10px] font-mono text-slate-500">
             {counts.GREEN}G · {counts.AMBER}A · {counts.RED}R
-            {counts.UNKNOWN > 0 && (
-              <span className="text-slate-600"> · {counts.UNKNOWN} gap</span>
-            )}
-            <span className="ml-2 text-emerald-400">
-              {uptime}% healthy
-            </span>
+            {counts.UNKNOWN > 0 && <span className="text-slate-600"> · {counts.UNKNOWN} gap</span>}
+            <span className="ml-2 text-emerald-400">{uptime}% healthy</span>
           </div>
         )}
       </div>
@@ -134,9 +127,7 @@ export function CorridorStatusSparkline({
           Loading timeline…
         </div>
       ) : error ? (
-        <div className="h-8 flex items-center text-[11px] text-red-400">
-          {error}
-        </div>
+        <div className="h-8 flex items-center text-[11px] text-red-400">{error}</div>
       ) : !events || events.length === 0 ? (
         <div className="h-8 flex items-center text-[11px] text-slate-600 italic">
           Collecting history — no refresh events logged yet.
@@ -147,7 +138,7 @@ export function CorridorStatusSparkline({
             {buckets.map((cell, i) => (
               <div
                 key={cell.day}
-                className="flex-1 min-w-[2px] rounded-sm"
+                className="flex-1 min-w-[2px]"
                 style={{
                   background: COLORS[cell.status],
                   opacity: cell.status === "UNKNOWN" ? 0.3 : 0.85,

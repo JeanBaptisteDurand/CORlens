@@ -1,10 +1,5 @@
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import type { CorridorListItem } from "../../lib/core-types.js";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
 import { Stat } from "./Stat";
 import { StatusBadge } from "./StatusBadge";
 
@@ -21,9 +16,7 @@ interface CorridorCardProps {
 }
 
 export function CorridorCard({ item, onClick }: CorridorCardProps) {
-  const winningRoute = item.routeResults.find(
-    (route) => route.routeId === item.bestRouteId,
-  );
+  const winningRoute = item.routeResults.find((route) => route.routeId === item.bestRouteId);
   const candidateCount = item.routeResults.length;
 
   return (
@@ -43,9 +36,7 @@ export function CorridorCard({ item, onClick }: CorridorCardProps) {
           <CardTitle className="text-base text-white">{item.label}</CardTitle>
           <div className="mt-0.5 text-[10px] font-mono text-slate-500">
             {candidateCount} route{candidateCount !== 1 ? "s" : ""} ·{" "}
-            {winningRoute
-              ? `winner: ${winningRoute.label}`
-              : "no winner picked"}
+            {winningRoute ? `winner: ${winningRoute.label}` : "no winner picked"}
           </div>
         </div>
         <StatusBadge status={item.status} />
@@ -59,9 +50,7 @@ export function CorridorCard({ item, onClick }: CorridorCardProps) {
             {item.aiNote}
           </p>
         ) : (
-          <p className="text-xs italic leading-relaxed text-slate-400">
-            {item.description}
-          </p>
+          <p className="text-xs italic leading-relaxed text-slate-400">{item.description}</p>
         )}
 
         <div className="grid grid-cols-3 gap-2 text-xs">
@@ -71,9 +60,12 @@ export function CorridorCard({ item, onClick }: CorridorCardProps) {
               <Stat label="Off-ramps" value={String(item.destActors?.length ?? 0)} />
               <Stat label="Bridge" value={item.bridgeAsset ?? "RLUSD"} />
             </>
-          ) : (() => {
+          ) : (
+            (() => {
               const routes = item.routeResults ?? [];
-              const active = routes.filter((r) => r.status === "GREEN" || r.status === "AMBER").length;
+              const active = routes.filter(
+                (r) => r.status === "GREEN" || r.status === "AMBER",
+              ).length;
               return (
                 <>
                   <Stat label="Routes" value={String(routes.length)} />
@@ -85,7 +77,8 @@ export function CorridorCard({ item, onClick }: CorridorCardProps) {
                   <Stat label="On-ramps" value={String(item.sourceActors?.length ?? 0)} />
                 </>
               );
-            })()}
+            })()
+          )}
         </div>
 
         {item.liquidity?.notes && item.liquidity.notes.length > 0 && (
@@ -93,7 +86,7 @@ export function CorridorCard({ item, onClick }: CorridorCardProps) {
             {item.liquidity.notes.slice(0, 3).map((note, idx) => (
               <span
                 key={idx}
-                className="rounded border border-slate-800 bg-slate-900/50 px-1.5 py-0.5 font-mono text-[9px] text-slate-400"
+                className="border border-slate-800 bg-slate-900/50 px-1.5 py-0.5 font-mono text-[9px] text-slate-400"
               >
                 {note}
               </span>
@@ -111,7 +104,7 @@ export function CorridorCard({ item, onClick }: CorridorCardProps) {
                 <span
                   key={flag.flag}
                   title={flag.detail}
-                  className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold ${
+                  className={`px-1.5 py-0.5 font-mono text-[9px] font-semibold ${
                     flag.severity === "HIGH"
                       ? "border border-red-500/30 bg-red-500/10 text-red-400"
                       : flag.severity === "MED"

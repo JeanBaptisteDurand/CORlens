@@ -29,17 +29,17 @@ const COLORS = {
   bridge: "#10b981",
   actorOdl: "#38bdf8",
   actorRlusd: "#34d399",
-  actorCex: "#94a3b8",
+  actorCex: "#8A93A6",
   actorBank: "#a78bfa",
   actorHub: "#22d3ee",
   actorMobile: "#fbbf24",
-  edge: "#475569",
+  edge: "#5A6483",
   edgeStrong: "#0ea5e9",
   edgeRlusd: "#10b981",
 };
 
 const ACTOR_FILL: Record<CorridorActor["type"], string> = {
-  cex: "#1e293b",
+  cex: "rgba(244,246,250,0.14)",
   odl: "#0c4a6e",
   bank: "#3b0764",
   custodian: "#3b0764",
@@ -52,7 +52,7 @@ const ACTOR_FILL: Record<CorridorActor["type"], string> = {
 };
 
 const ACTOR_BORDER: Record<CorridorActor["type"], string> = {
-  cex: "#475569",
+  cex: "#5A6483",
   odl: "#38bdf8",
   bank: "#a78bfa",
   custodian: "#a78bfa",
@@ -142,10 +142,8 @@ function buildGraph(corridor: CorridorPairDef): { nodes: Node[]; edges: Edge[] }
     style: {
       width: LAYOUT.fiatNodeW,
       height: LAYOUT.fiatNodeH,
-      background: "#0f172a",
+      background: "#0B0F1C",
       border: `2px solid ${COLORS.fiat}`,
-      borderRadius: 12,
-      boxShadow: "0 0 24px rgba(14,165,233,0.25)",
       padding: 0,
     },
     sourcePosition: "right" as any,
@@ -171,16 +169,12 @@ function buildGraph(corridor: CorridorPairDef): { nodes: Node[]; edges: Edge[] }
             </div>
             <div className="mt-0.5 flex items-center gap-1 text-[9px] uppercase tracking-wider">
               <span className="text-slate-500">{actor.type}</span>
-              {actor.odl && (
-                <span className="rounded bg-sky-500/20 px-1 text-sky-300 font-bold">ODL</span>
-              )}
+              {actor.odl && <span className="bg-sky-500/20 px-1 text-sky-300 font-bold">ODL</span>}
               {actor.supportsRlusd && (
-                <span className="rounded bg-emerald-500/20 px-1 text-emerald-300 font-bold">
-                  RLUSD
-                </span>
+                <span className="bg-emerald-500/20 px-1 text-emerald-300 font-bold">RLUSD</span>
               )}
               {actor.supportsXrp && (
-                <span className="rounded bg-amber-500/20 px-1 text-amber-300 font-bold">XRP</span>
+                <span className="bg-amber-500/20 px-1 text-amber-300 font-bold">XRP</span>
               )}
             </div>
           </div>
@@ -189,9 +183,8 @@ function buildGraph(corridor: CorridorPairDef): { nodes: Node[]; edges: Edge[] }
       style: {
         width: LAYOUT.actorNodeW,
         height: LAYOUT.actorNodeH,
-        background: ACTOR_FILL[actor.type] ?? "#1e293b",
-        border: `1.5px solid ${ACTOR_BORDER[actor.type] ?? "#475569"}`,
-        borderRadius: 8,
+        background: ACTOR_FILL[actor.type] ?? "rgba(244,246,250,0.14)",
+        border: `1.5px solid ${ACTOR_BORDER[actor.type] ?? "#5A6483"}`,
         padding: 0,
       },
       sourcePosition: "right" as any,
@@ -254,8 +247,6 @@ function buildGraph(corridor: CorridorPairDef): { nodes: Node[]; edges: Edge[] }
       height: LAYOUT.bridgeNodeH,
       background: "#042f2e",
       border: `2px solid ${COLORS.bridge}`,
-      borderRadius: 14,
-      boxShadow: "0 0 30px rgba(16,185,129,0.35)",
       padding: 0,
     },
     sourcePosition: "right" as any,
@@ -281,16 +272,12 @@ function buildGraph(corridor: CorridorPairDef): { nodes: Node[]; edges: Edge[] }
             </div>
             <div className="mt-0.5 flex items-center gap-1 text-[9px] uppercase tracking-wider">
               <span className="text-slate-500">{actor.type}</span>
-              {actor.odl && (
-                <span className="rounded bg-sky-500/20 px-1 text-sky-300 font-bold">ODL</span>
-              )}
+              {actor.odl && <span className="bg-sky-500/20 px-1 text-sky-300 font-bold">ODL</span>}
               {actor.supportsRlusd && (
-                <span className="rounded bg-emerald-500/20 px-1 text-emerald-300 font-bold">
-                  RLUSD
-                </span>
+                <span className="bg-emerald-500/20 px-1 text-emerald-300 font-bold">RLUSD</span>
               )}
               {actor.supportsXrp && (
-                <span className="rounded bg-amber-500/20 px-1 text-amber-300 font-bold">XRP</span>
+                <span className="bg-amber-500/20 px-1 text-amber-300 font-bold">XRP</span>
               )}
             </div>
           </div>
@@ -299,9 +286,8 @@ function buildGraph(corridor: CorridorPairDef): { nodes: Node[]; edges: Edge[] }
       style: {
         width: LAYOUT.actorNodeW,
         height: LAYOUT.actorNodeH,
-        background: ACTOR_FILL[actor.type] ?? "#1e293b",
-        border: `1.5px solid ${ACTOR_BORDER[actor.type] ?? "#475569"}`,
-        borderRadius: 8,
+        background: ACTOR_FILL[actor.type] ?? "rgba(244,246,250,0.14)",
+        border: `1.5px solid ${ACTOR_BORDER[actor.type] ?? "#5A6483"}`,
         padding: 0,
       },
       sourcePosition: "right" as any,
@@ -358,10 +344,8 @@ function buildGraph(corridor: CorridorPairDef): { nodes: Node[]; edges: Edge[] }
     style: {
       width: LAYOUT.fiatNodeW,
       height: LAYOUT.fiatNodeH,
-      background: "#0f172a",
+      background: "#0B0F1C",
       border: `2px solid ${"#f59e0b"}`,
-      borderRadius: 12,
-      boxShadow: "0 0 24px rgba(245,158,11,0.25)",
       padding: 0,
     },
     sourcePosition: "right" as any,
@@ -386,7 +370,7 @@ interface NodeLegendEntry {
 }
 
 const NODE_LEGEND: NodeLegendEntry[] = [
-  { label: "source fiat", fill: "#0f172a", border: "#0ea5e9", title: "Source currency (sky ring)" },
+  { label: "source fiat", fill: "#0B0F1C", border: "#0ea5e9", title: "Source currency (sky ring)" },
   {
     label: "bridge",
     fill: "#042f2e",
@@ -395,7 +379,7 @@ const NODE_LEGEND: NodeLegendEntry[] = [
   },
   {
     label: "dest fiat",
-    fill: "#0f172a",
+    fill: "#0B0F1C",
     border: "#f59e0b",
     title: "Destination currency (amber ring)",
   },
@@ -473,7 +457,7 @@ const EDGE_LEGEND: EdgeLegendEntry[] = [
 function NodeDot({ entry }: { entry: NodeLegendEntry }) {
   return (
     <span
-      className="inline-block h-2.5 w-2.5 rounded-sm flex-shrink-0"
+      className="inline-block h-2.5 w-2.5 flex-shrink-0"
       style={{
         background: entry.fill,
         border: `1.5px solid ${entry.border}`,
@@ -492,8 +476,8 @@ export function CorridorActorGraph({ corridor, height = 480 }: CorridorActorGrap
   const { nodes, edges } = useMemo(() => buildGraph(corridor), [corridor]);
   return (
     <div
-      className="relative w-full overflow-hidden rounded-lg border border-slate-800"
-      style={{ height, background: "#020617" }}
+      className="relative w-full overflow-hidden border border-slate-800"
+      style={{ height, background: "#020409" }}
       data-testid="corridor-actor-graph"
     >
       <ReactFlow
@@ -508,7 +492,12 @@ export function CorridorActorGraph({ corridor, height = 480 }: CorridorActorGrap
         nodesConnectable={false}
         proOptions={{ hideAttribution: true }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={18} size={1} color="#1e293b" />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={18}
+          size={1}
+          color="rgba(244,246,250,0.14)"
+        />
       </ReactFlow>
 
       {/* Top-left: path caption */}
@@ -522,7 +511,7 @@ export function CorridorActorGraph({ corridor, height = 480 }: CorridorActorGrap
           rows: node types + edge types. */}
       <div
         data-testid="corridor-actor-graph-legend"
-        className="pointer-events-none absolute bottom-0 left-0 right-0 border-t border-slate-800/80 bg-black/60 backdrop-blur-md px-4 py-2"
+        className="pointer-events-none absolute bottom-0 left-0 right-0 border-t border-slate-800/80 bg-[#020409]/90 px-4 py-2"
       >
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <span className="text-[9px] font-bold uppercase tracking-[0.25em] text-slate-500 mr-1">

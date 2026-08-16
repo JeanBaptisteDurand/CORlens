@@ -8,6 +8,9 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      // The home hero drops its side-by-side globe layout here; used almost
+      // exclusively through the auto-generated `max-hero:` variant.
+      screens: { hero: "900px" },
       colors: {
         xrp: colors.brand,
         slate: colors.slate,

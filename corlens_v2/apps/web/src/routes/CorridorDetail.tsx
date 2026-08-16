@@ -1,22 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { api } from "../api/index.js";
+import { CorridorStatusSparkline } from "../components/corridors/CorridorStatusSparkline";
+import { PartnerDepthBadge } from "../components/corridors/PartnerDepthBadge";
+import { CorridorActorGraph } from "../components/graph/CorridorActorGraph";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import type {
   CorridorActor,
   CorridorDetailResponse,
   CorridorListItem,
   CorridorRouteResult,
 } from "../lib/core-types.js";
-import { api } from "../api/index.js";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { CorridorActorGraph } from "../components/graph/CorridorActorGraph";
-import { CorridorStatusSparkline } from "../components/corridors/CorridorStatusSparkline";
-import { PartnerDepthBadge } from "../components/corridors/PartnerDepthBadge";
 
 // Corridors where a partner-depth live feed is wired. Keep in sync with
 // PARTNER_DEPTH_BOOKS on the server (corlens/apps/server/src/corridors/partnerDepth.ts).
-const PARTNER_DEPTH_CORRIDORS: Record<string, { actor: string; label: string; base: string; quote: string }> = {
+const PARTNER_DEPTH_CORRIDORS: Record<
+  string,
+  { actor: string; label: string; base: string; quote: string }
+> = {
   "usd-mxn": { actor: "bitso", label: "Bitso", base: "XRP", quote: "MXN" },
   "mxn-usd": { actor: "bitso", label: "Bitso", base: "XRP", quote: "MXN" },
 };
@@ -140,24 +143,14 @@ export default function CorridorDetail() {
     return (
       <div className="max-w-2xl mx-auto px-6 py-16 text-center">
         <h1 className="text-2xl font-bold text-white mb-2">Corridor not found</h1>
-        <p className="text-sm text-slate-400 mb-6">
-          {error ?? `No corridor matched ${id}.`}
-        </p>
+        <p className="text-sm text-slate-400 mb-6">{error ?? `No corridor matched ${id}.`}</p>
         <Button onClick={() => navigate("/corridors")}>Back to atlas</Button>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-[calc(100vh-3.5rem)] overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(14,165,233,0.18) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(2,132,199,0.10) 0%, transparent 60%)",
-        }}
-      />
+    <div className="relative min-h-[calc(100vh-3.5rem)] overflow-hidden bg-[#070B14]">
       <div className="max-w-7xl mx-auto px-6 py-8 pb-28">
         {/* Header */}
         <button
@@ -170,18 +163,14 @@ export default function CorridorDetail() {
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1.5">
               <span className="text-xl leading-none">{corridor.flag}</span>
-              <span className="rounded bg-slate-800/60 border border-slate-700 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate-300">
-                {kindLabel(corridorKind)}
-              </span>
-              <span className="rounded bg-slate-800/60 border border-slate-700 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate-300">
-                {regionLabel(corridor.region)}
-              </span>
-              <span
-                className="rounded bg-slate-800/60 border border-slate-700 px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider text-slate-300"
+              <Badge variant="default">{kindLabel(corridorKind)}</Badge>
+              <Badge variant="default">{regionLabel(corridor.region)}</Badge>
+              <Badge
+                variant="default"
                 title="Internal priority score used to rank corridors in the atlas (higher = more important)"
               >
                 Priority {corridor.importance}/99
-              </span>
+              </Badge>
             </div>
             <h1 className="text-2xl font-bold text-white mb-0.5">{corridor.label}</h1>
             {/* Show the short label only when it actually adds information
@@ -192,9 +181,7 @@ export default function CorridorDetail() {
             {corridor.shortLabel !== corridor.label &&
               !corridor.shortLabel.includes("off-chain via") &&
               !corridor.shortLabel.includes("routes)") && (
-                <div className="text-xs font-mono text-slate-500">
-                  {corridor.shortLabel}
-                </div>
+                <div className="text-xs font-mono text-slate-500">{corridor.shortLabel}</div>
               )}
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -232,7 +219,8 @@ export default function CorridorDetail() {
                           : `Source-side cost from live XRPL path_find via the winning on-chain IOU route (${winner?.label ?? ""}). This is a real on-ledger quote, not an estimate.`
                       }
                     >
-                      Quote: {Number(cost).toLocaleString(undefined, {
+                      Quote:{" "}
+                      {Number(cost).toLocaleString(undefined, {
                         maximumFractionDigits: 2,
                       })}{" "}
                       {corridor.source.symbol}
@@ -266,7 +254,6 @@ export default function CorridorDetail() {
                   `/safe-path?srcCcy=${encodeURIComponent(corridor.source.symbol)}&dstCcy=${encodeURIComponent(corridor.dest.symbol)}&amount=${encodeURIComponent(corridor.amount ?? "1000")}`,
                 )
               }
-              className="bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white border-0"
               data-testid="corridor-to-safepath"
             >
               Analyze with Safe Path →
@@ -295,8 +282,8 @@ export default function CorridorDetail() {
               </p>
             ) : (
               <p className="text-xs text-slate-500 italic">
-                No AI commentary yet — the first refresh hasn't generated one for
-                this corridor. Click "Refresh scan" to force one.
+                No AI commentary yet — the first refresh hasn't generated one for this corridor.
+                Click "Refresh scan" to force one.
               </p>
             )}
             <div className="mt-3 text-[10px] uppercase tracking-widest text-slate-600">
@@ -373,103 +360,101 @@ export default function CorridorDetail() {
             judges see a dead XRPL orderbook next to a live CEX graph
             and think the corridor is broken. */}
         {corridorKind === "on-chain-active" && (
-        <>
-        <Card className="mb-4" data-testid="routes-comparison">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">
-              XRPL on-chain IOU orderbook
-              <span className="ml-2 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
-                · {corridor.routeResults.length} candidate
-                {corridor.routeResults.length !== 1 ? "s" : ""} · reference depth
-              </span>
-            </CardTitle>
-            <p className="mt-1 text-[11px] text-slate-500 leading-relaxed">
-              These are direct IOU trust lines on XRPL. Modern fiat
-              payments on this corridor flow through the real-world
-              partner graph below (via {corridor.bridgeAsset ?? "RLUSD"}
-              ); the numbers here are a complementary on-ledger depth
-              snapshot, not an alternative route.
-            </p>
-          </CardHeader>
-          <CardContent className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="text-[10px] uppercase tracking-wide text-slate-500 border-b border-slate-800">
-                  <th className="text-left py-2 pr-3">Route</th>
-                  <th className="text-left py-2 pr-3">Status</th>
-                  <th className="text-right py-2 pr-3">Paths</th>
-                  <th className="text-right py-2 pr-3">Risk</th>
-                  <th className="text-left py-2 pr-3">Liquidity</th>
-                  <th className="text-left py-2">Verdict</th>
-                </tr>
-              </thead>
-              <tbody>
-                {corridor.routeResults.map((r) => (
-                  <RouteRow
-                    key={r.routeId}
-                    route={r}
-                    selected={r.routeId === selectedRouteId}
-                    onSelect={() => setSelectedRouteId(r.routeId)}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
-
-        {/* Selected route detail */}
-        {selectedRoute && (
-          <Card className="mb-4" data-testid="selected-route-card">
-            <CardHeader className="pb-2 flex flex-row items-center justify-between gap-2">
-              <CardTitle className="text-sm">
-                Route detail: {selectedRoute.label}
-              </CardTitle>
-              {selectedRoute.isWinner && (
-                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                  Winner
-                </span>
-              )}
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <RouteLiquidityPanel route={selectedRoute} destSymbol={corridor.dest.symbol} />
-              {selectedRoute.flags.length > 0 && (
-                <div className="space-y-1">
-                  <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500">
-                    Risk flags ({selectedRoute.flags.length})
-                  </div>
-                  <div className="flex flex-wrap gap-1" data-testid="route-flags">
-                    {selectedRoute.flags.map((f) => (
-                      <span
-                        key={f.flag}
-                        title={f.detail}
-                        className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold ${
-                          f.severity === "HIGH"
-                            ? "bg-red-500/10 text-red-400 border border-red-500/30"
-                            : f.severity === "MED"
-                            ? "bg-amber-500/10 text-amber-400 border border-amber-500/30"
-                            : "bg-slate-700/40 text-slate-400 border border-slate-700"
-                        }`}
-                      >
-                        {f.flag}
-                      </span>
+          <>
+            <Card className="mb-4" data-testid="routes-comparison">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">
+                  XRPL on-chain IOU orderbook
+                  <span className="ml-2 text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                    · {corridor.routeResults.length} candidate
+                    {corridor.routeResults.length !== 1 ? "s" : ""} · reference depth
+                  </span>
+                </CardTitle>
+                <p className="mt-1 text-[11px] text-slate-500 leading-relaxed">
+                  These are direct IOU trust lines on XRPL. Modern fiat payments on this corridor
+                  flow through the real-world partner graph below (via{" "}
+                  {corridor.bridgeAsset ?? "RLUSD"}
+                  ); the numbers here are a complementary on-ledger depth snapshot, not an
+                  alternative route.
+                </p>
+              </CardHeader>
+              <CardContent className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-[10px] uppercase tracking-wide text-slate-500 border-b border-slate-800">
+                      <th className="text-left py-2 pr-3">Route</th>
+                      <th className="text-left py-2 pr-3">Status</th>
+                      <th className="text-right py-2 pr-3">Paths</th>
+                      <th className="text-right py-2 pr-3">Risk</th>
+                      <th className="text-left py-2 pr-3">Liquidity</th>
+                      <th className="text-left py-2">Verdict</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {corridor.routeResults.map((r) => (
+                      <RouteRow
+                        key={r.routeId}
+                        route={r}
+                        selected={r.routeId === selectedRouteId}
+                        onSelect={() => setSelectedRouteId(r.routeId)}
+                      />
                     ))}
-                  </div>
-                </div>
-              )}
-              {selectedRoute.rationale && (
-                <p className="text-xs text-slate-400 italic">
-                  Rationale: {selectedRoute.rationale}
-                </p>
-              )}
-              {selectedRoute.rejectedReason && (
-                <p className="text-xs text-amber-400">
-                  Picker rejected: {selectedRoute.rejectedReason}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        )}
-        </>
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+
+            {/* Selected route detail */}
+            {selectedRoute && (
+              <Card className="mb-4" data-testid="selected-route-card">
+                <CardHeader className="pb-2 flex flex-row items-center justify-between gap-2">
+                  <CardTitle className="text-sm">Route detail: {selectedRoute.label}</CardTitle>
+                  {selectedRoute.isWinner && (
+                    <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
+                      Winner
+                    </span>
+                  )}
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <RouteLiquidityPanel route={selectedRoute} destSymbol={corridor.dest.symbol} />
+                  {selectedRoute.flags.length > 0 && (
+                    <div className="space-y-1">
+                      <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500">
+                        Risk flags ({selectedRoute.flags.length})
+                      </div>
+                      <div className="flex flex-wrap gap-1" data-testid="route-flags">
+                        {selectedRoute.flags.map((f) => (
+                          <span
+                            key={f.flag}
+                            title={f.detail}
+                            className={`px-1.5 py-0.5 text-[10px] font-mono font-semibold ${
+                              f.severity === "HIGH"
+                                ? "bg-red-500/10 text-red-400 border border-red-500/30"
+                                : f.severity === "MED"
+                                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/30"
+                                  : "bg-slate-700/40 text-slate-400 border border-slate-700"
+                            }`}
+                          >
+                            {f.flag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {selectedRoute.rationale && (
+                    <p className="text-xs text-slate-400 italic">
+                      Rationale: {selectedRoute.rationale}
+                    </p>
+                  )}
+                  {selectedRoute.rejectedReason && (
+                    <p className="text-xs text-amber-400">
+                      Picker rejected: {selectedRoute.rejectedReason}
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
 
         {/* Static description + highlights — hidden for off-chain-bridge
@@ -531,12 +516,10 @@ export default function CorridorDetail() {
                 <button
                   key={r.id}
                   onClick={() => navigate(`/corridors/${r.id}`)}
-                  className="text-left bg-slate-900/50 border border-slate-800 rounded px-3 py-2 hover:border-xrp-500 transition"
+                  className="text-left bg-slate-900/50 border border-slate-800 px-3 py-2 hover:border-xrp-400 transition"
                 >
                   <div className="text-xs font-semibold text-white">{r.label}</div>
-                  <div className="text-[10px] font-mono text-slate-500 mt-0.5">
-                    {r.shortLabel}
-                  </div>
+                  <div className="text-[10px] font-mono text-slate-500 mt-0.5">{r.shortLabel}</div>
                   <div className="mt-1 flex items-center gap-2">
                     <StatusBadge status={r.status} />
                     <span className="text-[9px] text-slate-500">imp {r.importance}</span>
@@ -565,7 +548,7 @@ function StatusBadge({ status }: { status: string }) {
   };
   return (
     <span
-      className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-widest uppercase ${
+      className={`px-2 py-0.5 font-mono text-[10px] font-bold tracking-widest uppercase ${
         map[status] ?? map.UNKNOWN
       }`}
     >
@@ -620,8 +603,8 @@ function RouteRow({
             route.recommendedRiskScore != null && route.recommendedRiskScore > 20
               ? "text-red-400"
               : route.recommendedRiskScore != null && route.recommendedRiskScore > 0
-              ? "text-amber-400"
-              : "text-emerald-400"
+                ? "text-amber-400"
+                : "text-emerald-400"
           }
         >
           {route.recommendedRiskScore ?? "—"}
@@ -686,7 +669,9 @@ function RouteLiquidityPanel({
         />
       )}
       {!liq && (
-        <p className="col-span-2 text-slate-500 italic">No liquidity scan recorded for this route.</p>
+        <p className="col-span-2 text-slate-500 italic">
+          No liquidity scan recorded for this route.
+        </p>
       )}
     </div>
   );
@@ -698,9 +683,7 @@ function RouteLiquidityPanel({
 // right above the corridor title and are the first thing a judge sees —
 // so they must not look like raw enum dumps.
 
-function kindLabel(
-  kind: "off-chain-bridge" | "on-chain-legacy" | "on-chain-active",
-): string {
+function kindLabel(kind: "off-chain-bridge" | "on-chain-legacy" | "on-chain-active"): string {
   switch (kind) {
     case "off-chain-bridge":
       return "Off-chain bridge";
@@ -751,21 +734,20 @@ function CorridorKindBanner({
     return (
       <div
         data-testid="corridor-kind-banner"
-        className="mb-4 rounded-xl border border-emerald-500/25 bg-emerald-500/5 px-4 py-3"
+        className="mb-4 border border-emerald-500/25 bg-emerald-500/5 px-4 py-3"
       >
         <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.3em] text-emerald-300">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+          <span className="inline-block h-1.5 w-1.5 bg-emerald-400" />
           Off-chain rail via {bridge} on XRPL
         </div>
         <p className="mt-1.5 text-[12px] leading-relaxed text-slate-300">
-          This corridor has <strong>no on-chain IOU trust lines</strong> on
-          either side. The real flow is: <span className="font-mono">{corridor.source.symbol}</span> →
-          off-chain partner → <span className="font-mono">{bridge}</span> held
-          on XRPL by the partner → off-chain partner on the destination side
-          → <span className="font-mono">{corridor.dest.symbol}</span>. The
-          graph below shows the real partners end-to-end. CorLens does not
-          path_find this lane — status is derived from partner quality, not
-          on-ledger depth.
+          This corridor has <strong>no on-chain IOU trust lines</strong> on either side. The real
+          flow is: <span className="font-mono">{corridor.source.symbol}</span> → off-chain partner →{" "}
+          <span className="font-mono">{bridge}</span> held on XRPL by the partner → off-chain
+          partner on the destination side →{" "}
+          <span className="font-mono">{corridor.dest.symbol}</span>. The graph below shows the real
+          partners end-to-end. CorLens does not path_find this lane — status is derived from partner
+          quality, not on-ledger depth.
         </p>
       </div>
     );
@@ -774,21 +756,19 @@ function CorridorKindBanner({
     return (
       <div
         data-testid="corridor-kind-banner"
-        className="mb-4 rounded-xl border border-sky-500/25 bg-sky-500/5 px-4 py-3"
+        className="mb-4 border border-sky-500/25 bg-sky-500/5 px-4 py-3"
       >
         <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.3em] text-sky-300">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(14,165,233,0.8)]" />
+          <span className="inline-block h-1.5 w-1.5 bg-sky-400" />
           Hybrid corridor · legacy XRPL IOUs + live off-chain rails
         </div>
         <p className="mt-1.5 text-[12px] leading-relaxed text-slate-300">
-          This corridor <em>does</em> have on-chain XRPL IOU trust lines
-          (historically via GateHub / Bitstamp) but they are effectively
-          dead — zero live paths on the last scan. The real flow today
-          runs through the off-chain partners below and bridges via{" "}
-          <span className="font-mono">{bridge}</span> on XRPL. We hide the
-          legacy XRPL orderbook section here so the page tells one coherent
-          story; status is governed by the real-world rail, not the
-          deprecated IOU depth.
+          This corridor <em>does</em> have on-chain XRPL IOU trust lines (historically via GateHub /
+          Bitstamp) but they are effectively dead — zero live paths on the last scan. The real flow
+          today runs through the off-chain partners below and bridges via{" "}
+          <span className="font-mono">{bridge}</span> on XRPL. We hide the legacy XRPL orderbook
+          section here so the page tells one coherent story; status is governed by the real-world
+          rail, not the deprecated IOU depth.
         </p>
       </div>
     );
@@ -797,23 +777,20 @@ function CorridorKindBanner({
   return (
     <div
       data-testid="corridor-kind-banner"
-      className="mb-4 rounded-xl border border-amber-500/25 bg-amber-500/5 px-4 py-3"
+      className="mb-4 border border-amber-500/25 bg-amber-500/5 px-4 py-3"
     >
       <div className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.3em] text-amber-300">
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+        <span className="inline-block h-1.5 w-1.5 bg-amber-400" />
         XRPL-native corridor · on-chain IOU orderbook + off-chain rails
       </div>
       <p className="mt-1.5 text-[12px] leading-relaxed text-slate-300">
-        This corridor has live on-chain XRPL liquidity via direct IOU
-        trust lines — the routes table below scans real orderbooks, AMM
-        pools, and path_find results. It <em>also</em> has a full
-        real-world partner rail via{" "}
-        <span className="font-mono">{bridge}</span>, shown in the graph
+        This corridor has live on-chain XRPL liquidity via direct IOU trust lines — the routes table
+        below scans real orderbooks, AMM pools, and path_find results. It <em>also</em> has a full
+        real-world partner rail via <span className="font-mono">{bridge}</span>, shown in the graph
         below. Both are valid ways to move{" "}
         <span className="font-mono">{corridor.source.symbol}</span> →{" "}
-        <span className="font-mono">{corridor.dest.symbol}</span>; the
-        on-chain numbers show the best-case direct XRPL depth, the
-        partner graph shows who actually handles retail flow today.
+        <span className="font-mono">{corridor.dest.symbol}</span>; the on-chain numbers show the
+        best-case direct XRPL depth, the partner graph shows who actually handles retail flow today.
       </p>
     </div>
   );
@@ -826,16 +803,27 @@ function CorridorKindBanner({
 
 function actorBadge(type: CorridorActor["type"]): string {
   switch (type) {
-    case "odl": return "border-sky-500/40 text-sky-300 bg-sky-500/10";
-    case "bank": return "border-violet-500/40 text-violet-300 bg-violet-500/10";
-    case "custodian": return "border-violet-500/40 text-violet-300 bg-violet-500/10";
-    case "hub": return "border-cyan-500/40 text-cyan-300 bg-cyan-500/10";
-    case "remittance": return "border-emerald-500/40 text-emerald-300 bg-emerald-500/10";
-    case "mobile-money": return "border-amber-500/40 text-amber-300 bg-amber-500/10";
-    case "fintech": return "border-teal-500/40 text-teal-300 bg-teal-500/10";
-    case "otc": return "border-fuchsia-500/40 text-fuchsia-300 bg-fuchsia-500/10";
-    case "p2p": return "border-rose-500/40 text-rose-300 bg-rose-500/10";
-    case "cex": default: return "border-slate-600 text-slate-300 bg-slate-800/40";
+    case "odl":
+      return "border-sky-500/40 text-sky-300 bg-sky-500/10";
+    case "bank":
+      return "border-violet-500/40 text-violet-300 bg-violet-500/10";
+    case "custodian":
+      return "border-violet-500/40 text-violet-300 bg-violet-500/10";
+    case "hub":
+      return "border-cyan-500/40 text-cyan-300 bg-cyan-500/10";
+    case "remittance":
+      return "border-emerald-500/40 text-emerald-300 bg-emerald-500/10";
+    case "mobile-money":
+      return "border-amber-500/40 text-amber-300 bg-amber-500/10";
+    case "fintech":
+      return "border-teal-500/40 text-teal-300 bg-teal-500/10";
+    case "otc":
+      return "border-fuchsia-500/40 text-fuchsia-300 bg-fuchsia-500/10";
+    case "p2p":
+      return "border-rose-500/40 text-rose-300 bg-rose-500/10";
+    case "cex":
+    default:
+      return "border-slate-600 text-slate-300 bg-slate-800/40";
   }
 }
 
@@ -850,27 +838,24 @@ function ActorColumn({
 }) {
   if (actors.length === 0) {
     return (
-      <div className="rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-3">
+      <div className="border border-slate-800 bg-slate-950/60 px-3 py-3">
         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
           <span className="text-sm">{flag}</span>
           {title}
         </div>
         <div className="text-[11px] italic text-slate-500">
-          No actor recorded in the research atlas. This currency is either
-          sanctioned, under a crypto ban, or only reachable via an ODL
-          super-hub (Tranglo, Onafriq).
+          No actor recorded in the research atlas. This currency is either sanctioned, under a
+          crypto ban, or only reachable via an ODL super-hub (Tranglo, Onafriq).
         </div>
       </div>
     );
   }
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-3">
+    <div className="border border-slate-800 bg-slate-950/60 px-3 py-3">
       <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
         <span className="text-sm">{flag}</span>
         {title}
-        <span className="ml-auto font-mono text-[9px] text-slate-600">
-          {actors.length}
-        </span>
+        <span className="ml-auto font-mono text-[9px] text-slate-600">{actors.length}</span>
       </div>
       <ul className="space-y-1.5">
         {actors.map((a) => (
@@ -880,41 +865,33 @@ function ActorColumn({
             data-testid={`actor-${a.key}`}
           >
             <span
-              className={`mt-0.5 inline-block rounded border px-1 py-0 font-mono text-[9px] uppercase tracking-wider ${actorBadge(a.type)}`}
+              className={`mt-0.5 inline-block border px-1 py-0 font-mono text-[9px] uppercase tracking-wider ${actorBadge(a.type)}`}
             >
               {a.type}
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="font-semibold text-white truncate">
-                  {a.name}
-                </span>
+                <span className="font-semibold text-white truncate">{a.name}</span>
                 {a.country && (
-                  <span className="font-mono text-[9px] text-slate-500">
-                    {a.country}
-                  </span>
+                  <span className="font-mono text-[9px] text-slate-500">{a.country}</span>
                 )}
                 {a.odl && (
-                  <span className="rounded bg-sky-500/15 border border-sky-500/40 px-1 text-[9px] font-bold text-sky-300 uppercase tracking-wider">
+                  <span className="bg-sky-500/15 border border-sky-500/40 px-1 text-[9px] font-bold text-sky-300 uppercase tracking-wider">
                     ODL
                   </span>
                 )}
                 {a.supportsRlusd && (
-                  <span className="rounded bg-emerald-500/15 border border-emerald-500/40 px-1 text-[9px] font-bold text-emerald-300 uppercase tracking-wider">
+                  <span className="bg-emerald-500/15 border border-emerald-500/40 px-1 text-[9px] font-bold text-emerald-300 uppercase tracking-wider">
                     RLUSD
                   </span>
                 )}
                 {a.supportsXrp && (
-                  <span className="rounded bg-amber-500/15 border border-amber-500/40 px-1 text-[9px] font-bold text-amber-300 uppercase tracking-wider">
+                  <span className="bg-amber-500/15 border border-amber-500/40 px-1 text-[9px] font-bold text-amber-300 uppercase tracking-wider">
                     XRP
                   </span>
                 )}
               </div>
-              {a.note && (
-                <div className="text-[10px] text-slate-400 mt-0.5">
-                  {a.note}
-                </div>
-              )}
+              {a.note && <div className="text-[10px] text-slate-400 mt-0.5">{a.note}</div>}
             </div>
           </li>
         ))}

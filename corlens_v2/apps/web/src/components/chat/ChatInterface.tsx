@@ -103,15 +103,15 @@ export function ChatInterface({ analysisId }: ChatInterfaceProps) {
                 style={{
                   fontSize: 32,
                   marginBottom: 8,
-                  color: "#0ea5e9",
+                  color: "#8FB4FF",
                 }}
               >
                 ◈
               </div>
-              <p style={{ fontSize: 16, fontWeight: 600, color: "#f8fafc", marginBottom: 6 }}>
+              <p style={{ fontSize: 16, fontWeight: 600, color: "#F4F6FA", marginBottom: 6 }}>
                 Ask about this analysis
               </p>
-              <p style={{ fontSize: 13, color: "#64748b", maxWidth: 400 }}>
+              <p style={{ fontSize: 13, color: "#7C8AA0", maxWidth: 400 }}>
                 I have full context of the knowledge graph — nodes, edges, risk flags, and on-chain
                 data.
               </p>
@@ -132,23 +132,23 @@ export function ChatInterface({ analysisId }: ChatInterfaceProps) {
                   key={q}
                   onClick={() => handleSuggestion(q)}
                   style={{
-                    background: "#0f172a",
-                    border: "1px solid #1e293b",
-                    borderRadius: 20,
+                    background: "#070B14",
+                    border: "1px solid rgba(244,246,250,0.14)",
                     padding: "8px 14px",
                     fontSize: 12,
-                    color: "#94a3b8",
+                    color: "#9AAAD0",
                     cursor: "pointer",
                     transition: "all 0.15s",
                     textAlign: "left",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = "#0ea5e9";
-                    (e.currentTarget as HTMLButtonElement).style.color = "#e2e8f0";
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = "#8FB4FF";
+                    (e.currentTarget as HTMLButtonElement).style.color = "#F4F6FA";
                   }}
                   onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = "#1e293b";
-                    (e.currentTarget as HTMLButtonElement).style.color = "#94a3b8";
+                    (e.currentTarget as HTMLButtonElement).style.borderColor =
+                      "rgba(244,246,250,0.14)";
+                    (e.currentTarget as HTMLButtonElement).style.color = "#9AAAD0";
                   }}
                 >
                   {q}
@@ -173,9 +173,12 @@ export function ChatInterface({ analysisId }: ChatInterfaceProps) {
               style={{
                 maxWidth: "75%",
                 padding: "10px 14px",
-                borderRadius: msg.role === "user" ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
-                background: msg.role === "user" ? "#0284c7" : "#1e293b",
-                color: "#f8fafc",
+                border:
+                  msg.role === "user"
+                    ? "1px solid rgba(143,180,255,0.4)"
+                    : "1px solid rgba(244,246,250,0.1)",
+                background: msg.role === "user" ? "rgba(110,143,221,0.16)" : "#12172A",
+                color: "#F4F6FA",
                 fontSize: 13,
                 lineHeight: 1.6,
               }}
@@ -194,9 +197,9 @@ export function ChatInterface({ analysisId }: ChatInterfaceProps) {
                   style={{
                     marginTop: 8,
                     paddingTop: 8,
-                    borderTop: "1px solid rgba(255,255,255,0.1)",
+                    borderTop: "1px solid rgba(244,246,250,0.1)",
                     fontSize: 10,
-                    color: "#64748b",
+                    color: "#7C8AA0",
                     display: "flex",
                     flexWrap: "wrap",
                     gap: 4,
@@ -206,8 +209,8 @@ export function ChatInterface({ analysisId }: ChatInterfaceProps) {
                     <span
                       key={s.nodeId}
                       style={{
-                        background: "#0f172a",
-                        borderRadius: 4,
+                        background: "#070B14",
+                        border: "1px solid rgba(244,246,250,0.1)",
                         padding: "1px 5px",
                       }}
                     >
@@ -226,13 +229,13 @@ export function ChatInterface({ analysisId }: ChatInterfaceProps) {
             <div
               style={{
                 padding: "10px 16px",
-                borderRadius: "12px 12px 12px 2px",
-                background: "#1e293b",
+                border: "1px solid rgba(244,246,250,0.1)",
+                background: "#12172A",
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
                 fontSize: 13,
-                color: "#64748b",
+                color: "#7C8AA0",
               }}
             >
               <span
@@ -240,8 +243,7 @@ export function ChatInterface({ analysisId }: ChatInterfaceProps) {
                   display: "inline-block",
                   width: 6,
                   height: 6,
-                  borderRadius: "50%",
-                  background: "#0ea5e9",
+                  background: "#8FB4FF",
                   animation: "pulse 1s infinite",
                 }}
               />
@@ -256,8 +258,7 @@ export function ChatInterface({ analysisId }: ChatInterfaceProps) {
             <div
               style={{
                 padding: "8px 12px",
-                borderRadius: 6,
-                background: "#450a0a",
+                background: "rgba(239,68,68,0.12)",
                 border: "1px solid #ef444440",
                 fontSize: 12,
                 color: "#f87171",
@@ -275,8 +276,8 @@ export function ChatInterface({ analysisId }: ChatInterfaceProps) {
       <div
         style={{
           padding: "12px 16px",
-          borderTop: "1px solid #1e293b",
-          background: "#020617",
+          borderTop: "1px solid rgba(244,246,250,0.14)",
+          background: "#020409",
         }}
       >
         <form onSubmit={handleSubmit} style={{ display: "flex", gap: 8 }}>

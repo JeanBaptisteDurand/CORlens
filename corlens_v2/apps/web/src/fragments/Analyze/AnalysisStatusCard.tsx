@@ -33,7 +33,7 @@ export function AnalysisStatusCard({
           <p className="text-sm text-red-400">{errorMessage ?? "An unknown error occurred."}</p>
         ) : (
           <div className="flex items-center gap-3">
-            <span className="inline-block h-2.5 w-2.5 animate-pulse rounded-full bg-xrp-400" />
+            <span className="inline-block h-2.5 w-2.5 animate-pulse bg-xrp-400" />
             <span className="text-sm text-slate-300">
               {statusValue === "running" ? "Crawling XRPL…" : "Queued — waiting…"}
             </span>

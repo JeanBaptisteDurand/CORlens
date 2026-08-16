@@ -16,9 +16,8 @@ export function GraphChatDrawer({ analysisId, onClose }: GraphChatDrawerProps) {
       className="absolute top-0 right-0 h-full z-30 flex flex-col"
       style={{
         width: 420,
-        background: "#020617",
-        borderLeft: "1px solid #1e293b",
-        boxShadow: "-8px 0 32px rgba(0, 0, 0, 0.4)",
+        background: "#020409",
+        borderLeft: "1px solid rgba(244,246,250,0.14)",
       }}
     >
       {/* Header */}
@@ -26,8 +25,8 @@ export function GraphChatDrawer({ analysisId, onClose }: GraphChatDrawerProps) {
         className="flex items-center justify-between flex-shrink-0"
         style={{
           padding: "10px 16px",
-          borderBottom: "1px solid #1e293b",
-          background: "#0f172a",
+          borderBottom: "1px solid rgba(244,246,250,0.14)",
+          background: "#070B14",
         }}
       >
         <div>
@@ -35,7 +34,7 @@ export function GraphChatDrawer({ analysisId, onClose }: GraphChatDrawerProps) {
             style={{
               fontSize: 9,
               fontWeight: 700,
-              color: "#0ea5e9",
+              color: "#8FB4FF",
               letterSpacing: 2,
               textTransform: "uppercase",
             }}
@@ -45,7 +44,7 @@ export function GraphChatDrawer({ analysisId, onClose }: GraphChatDrawerProps) {
           <div
             style={{
               fontSize: 11,
-              color: "#94a3b8",
+              color: "#8A93A6",
               marginTop: 2,
             }}
           >
@@ -57,7 +56,7 @@ export function GraphChatDrawer({ analysisId, onClose }: GraphChatDrawerProps) {
           onClick={onClose}
           aria-label="Close chat drawer"
           style={{
-            color: "#64748b",
+            color: "#7C8AA0",
             background: "none",
             border: "none",
             cursor: "pointer",

@@ -35,14 +35,14 @@ import type { CorridorDetailResponse, CorridorPathHop } from "../../lib/core-typ
 const COLORS = {
   source: "#0ea5e9",
   dest: "#f59e0b",
-  hop: "#64748b",
+  hop: "#7C8AA0",
   winnerRecommended: "#10b981",
   winnerAlt: "#0ea5e9",
-  otherRoute: "#475569",
+  otherRoute: "#5A6483",
   selected: "#fbbf24",
   riskHigh: "#ef4444",
   riskMed: "#f59e0b",
-  riskLow: "#94a3b8",
+  riskLow: "#8A93A6",
 };
 
 export interface CorridorRoutesGraphProps {
@@ -380,11 +380,11 @@ export function CorridorRoutesGraph({
               >
                 {n.kind}
               </div>
-              <div style={{ fontSize: 13, color: "#f8fafc", fontWeight: 700 }}>{n.currency}</div>
+              <div style={{ fontSize: 13, color: "#F4F6FA", fontWeight: 700 }}>{n.currency}</div>
               {n.issuerName ? (
-                <div style={{ fontSize: 10, color: "#cbd5e1" }}>{n.issuerName}</div>
+                <div style={{ fontSize: 10, color: "#C5CBE0" }}>{n.issuerName}</div>
               ) : n.addressShort ? (
-                <div style={{ fontSize: 9, color: "#94a3b8", fontFamily: "monospace" }}>
+                <div style={{ fontSize: 9, color: "#8A93A6", fontFamily: "monospace" }}>
                   {n.addressShort}
                 </div>
               ) : null}
@@ -404,9 +404,8 @@ export function CorridorRoutesGraph({
           ),
         },
         style: {
-          background: "#0f172a",
+          background: "#0B0F1C",
           border: `2px solid ${border}`,
-          borderRadius: 10,
           width: 160,
           padding: 8,
         },
@@ -436,12 +435,12 @@ export function CorridorRoutesGraph({
       } else if (e.isCandidateOnly) {
         // Structural edge for a route that wasn't path_found yet — still
         // needs to be visible, just subtler than real analysis edges.
-        color = "#94a3b8";
+        color = "#8A93A6";
         strokeWidth = 1.5;
         opacity = 0.85;
         dashed = true;
       } else if (e.count >= 2) {
-        color = "#cbd5e1";
+        color = "#C5CBE0";
         strokeWidth = 2.5;
         opacity = 0.9;
       }
@@ -486,13 +485,12 @@ export function CorridorRoutesGraph({
         data-testid="corridor-routes-graph-empty"
         style={{
           height,
-          background: "#020617",
-          border: "1px solid #1e293b",
-          borderRadius: 8,
+          background: "#020409",
+          border: "1px solid rgba(244,246,250,0.14)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#475569",
+          color: "#5A6483",
           fontSize: 12,
         }}
       >
@@ -506,9 +504,8 @@ export function CorridorRoutesGraph({
       data-testid="corridor-routes-graph"
       style={{
         height,
-        background: "#020617",
-        border: "1px solid #1e293b",
-        borderRadius: 8,
+        background: "#020409",
+        border: "1px solid rgba(244,246,250,0.14)",
         overflow: "hidden",
         position: "relative",
       }}
@@ -524,7 +521,12 @@ export function CorridorRoutesGraph({
         nodesConnectable={false}
         proOptions={{ hideAttribution: true }}
       >
-        <Background variant={BackgroundVariant.Dots} color="#1e293b" gap={24} size={1} />
+        <Background
+          variant={BackgroundVariant.Dots}
+          color="rgba(244,246,250,0.14)"
+          gap={24}
+          size={1}
+        />
         <Controls showInteractive={false} position="bottom-right" />
       </ReactFlow>
       <div
@@ -537,14 +539,13 @@ export function CorridorRoutesGraph({
           gap: 4,
           fontSize: 9,
           background: "rgba(2, 6, 23, 0.92)",
-          border: "1px solid #1e293b",
-          borderRadius: 6,
+          border: "1px solid rgba(244,246,250,0.14)",
           padding: "6px 10px",
-          color: "#94a3b8",
+          color: "#8A93A6",
           maxWidth: 300,
         }}
       >
-        <div style={{ fontWeight: 700, color: "#cbd5e1", letterSpacing: 1 }}>
+        <div style={{ fontWeight: 700, color: "#C5CBE0", letterSpacing: 1 }}>
           {focusMode && selectedRouteId ? "FOCUS · SINGLE ROUTE" : "ALL ROUTES · DEDUPED"}
         </div>
         <div>
@@ -581,7 +582,6 @@ function Legend({
           background: dashed
             ? `repeating-linear-gradient(90deg, ${swatch} 0 3px, transparent 3px 6px)`
             : swatch,
-          borderRadius: 1,
           flexShrink: 0,
         }}
       />

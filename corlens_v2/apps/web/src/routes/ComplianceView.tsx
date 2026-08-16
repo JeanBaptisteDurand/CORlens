@@ -1,14 +1,14 @@
-import ReactMarkdown from "react-markdown";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { useNavigate, useParams } from "react-router-dom";
 import remarkGfm from "remark-gfm";
+import { PremiumGate } from "../components/ui/PremiumGate.js";
 import { ComplianceHeader } from "../fragments/ComplianceView/ComplianceHeader.js";
 import {
   ComplianceEmptyState,
   ComplianceErrorState,
   ComplianceLoadingState,
 } from "../fragments/ComplianceView/ComplianceStates.js";
-import { PremiumGate } from "../components/ui/PremiumGate.js";
 import { useComplianceReport } from "../hooks/useGraph.js";
 
 export default function ComplianceView() {
@@ -47,43 +47,43 @@ export default function ComplianceView() {
 
   return (
     <PremiumGate>
-    <div className="mx-auto max-w-4xl px-6 py-8">
-      <ComplianceHeader
-        analysisId={analysisId}
-        hasReport={Boolean(reportMarkdown)}
-        isGenerating={mutation.isPending}
-        onBack={() => navigate(`/graph/${analysisId}`)}
-        onGenerate={handleGenerate}
-        onPrint={handlePrint}
-        onDownloadPdf={handleDownloadPdf}
-      />
-
-      {/* Error state */}
-      {mutation.isError && (
-        <ComplianceErrorState
-          message={
-            mutation.error instanceof Error
-              ? mutation.error.message
-              : "Failed to generate report."
-          }
+      <div className="mx-auto max-w-4xl px-6 py-8">
+        <ComplianceHeader
+          analysisId={analysisId}
+          hasReport={Boolean(reportMarkdown)}
+          isGenerating={mutation.isPending}
+          onBack={() => navigate(`/graph/${analysisId}`)}
+          onGenerate={handleGenerate}
+          onPrint={handlePrint}
+          onDownloadPdf={handleDownloadPdf}
         />
-      )}
 
-      {/* Empty state */}
-      {!reportMarkdown && !mutation.isPending && (
-        <ComplianceEmptyState onGenerate={handleGenerate} isGenerating={mutation.isPending} />
-      )}
+        {/* Error state */}
+        {mutation.isError && (
+          <ComplianceErrorState
+            message={
+              mutation.error instanceof Error
+                ? mutation.error.message
+                : "Failed to generate report."
+            }
+          />
+        )}
 
-      {/* Loading */}
-      {mutation.isPending && <ComplianceLoadingState />}
+        {/* Empty state */}
+        {!reportMarkdown && !mutation.isPending && (
+          <ComplianceEmptyState onGenerate={handleGenerate} isGenerating={mutation.isPending} />
+        )}
 
-      {/* Report — v2 markdown payload */}
-      {reportMarkdown && !mutation.isPending && (
-        <div className="prose prose-invert mt-6 max-w-none rounded-xl border border-[color:var(--app-glass-panel-border)] bg-slate-950/60 p-8">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{reportMarkdown}</ReactMarkdown>
-        </div>
-      )}
-    </div>
+        {/* Loading */}
+        {mutation.isPending && <ComplianceLoadingState />}
+
+        {/* Report — v2 markdown payload */}
+        {reportMarkdown && !mutation.isPending && (
+          <div className="prose prose-invert mt-6 max-w-none border border-[color:var(--app-glass-panel-border)] bg-slate-950/60 p-8">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{reportMarkdown}</ReactMarkdown>
+          </div>
+        )}
+      </div>
     </PremiumGate>
   );
 }

@@ -1,16 +1,11 @@
-import { lazy, Suspense, useEffect, useState, useSyncExternalStore } from "react";
+import { Suspense, lazy, useEffect, useState, useSyncExternalStore } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { getActiveRun, subscribe as subscribeStore } from "../stores/safePathStore";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { useAuth } from "../auth/useAuth.js";
 import { api } from "../api/index.js";
+import { useAuth } from "../auth/useAuth.js";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { getActiveRun, subscribe as subscribeStore } from "../stores/safePathStore";
 
 const History = lazy(() => import("./History"));
 
@@ -73,14 +68,11 @@ export default function Account() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/landing");
+      navigate("/home");
       return;
     }
     setLoading(true);
-    Promise.all([
-      api.getProfile(),
-      api.getSafePathHistory().catch(() => []),
-    ])
+    Promise.all([api.getProfile(), api.getSafePathHistory().catch(() => [])])
       .then(([p, runs]) => {
         setProfile(p);
         setSafePathRuns(runs);
@@ -96,18 +88,21 @@ export default function Account() {
       <h1 className="text-2xl font-bold text-white mb-6">Account</h1>
 
       {/* Tab bar */}
-      <div className="flex gap-1 mb-6 border-b border-slate-800 pb-px">
+      <div className="flex gap-1 mb-6 border-b border-[color:rgba(244,246,250,0.22)]">
         {TABS.map(({ key, label }) => (
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`px-4 py-2 text-sm font-medium rounded-t-md transition-colors ${
+            className={`relative px-4 py-2.5 text-sm font-semibold transition-colors ${
               activeTab === key
-                ? "bg-slate-900/80 text-white border border-slate-700 border-b-transparent -mb-px"
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/40"
+                ? "text-slate-100 [text-shadow:0_0_6px_rgba(180,205,255,0.55)]"
+                : "text-slate-400 hover:text-slate-100"
             }`}
           >
             {label}
+            {activeTab === key && (
+              <span className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-[#8FB4FF] shadow-[0_0_6px_1px_rgba(110,163,255,0.7)]" />
+            )}
           </button>
         ))}
       </div>
@@ -120,9 +115,7 @@ export default function Account() {
 
       {error && activeTab !== "history" && (
         <Card>
-          <CardContent className="py-8 text-center text-red-400">
-            {error}
-          </CardContent>
+          <CardContent className="py-8 text-center text-red-400">{error}</CardContent>
         </Card>
       )}
 
@@ -211,9 +204,7 @@ function ProfileTab({
         </CardHeader>
         <CardContent className="space-y-4">
           <Row label="Wallet Address">
-            <span className="font-mono text-sm text-slate-200">
-              {profile.walletAddress}
-            </span>
+            <span className="font-mono text-sm text-slate-200">{profile.walletAddress}</span>
           </Row>
           <Row label="Member since">
             <span className="text-sm text-slate-200">
@@ -230,9 +221,7 @@ function ProfileTab({
                 Premium
               </Badge>
             ) : (
-              <Badge className="bg-slate-700/50 text-slate-300 border-slate-600/50">
-                Free
-              </Badge>
+              <Badge className="bg-slate-700/50 text-slate-300 border-slate-600/50">Free</Badge>
             )}
           </Row>
         </CardContent>
@@ -247,7 +236,7 @@ function ProfileTab({
             {profile.subscriptions.map((sub) => (
               <div
                 key={sub.id}
-                className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-900/40 px-4 py-3"
+                className="flex items-center justify-between border border-slate-800 bg-slate-900/40 px-4 py-3"
               >
                 <div>
                   <div className="text-sm font-medium text-white">
@@ -272,9 +261,7 @@ function ProfileTab({
                 </a>
               </div>
             ))}
-            <div className="text-xs text-slate-500">
-              Lifetime access -- no expiration
-            </div>
+            <div className="text-xs text-slate-500">Lifetime access -- no expiration</div>
           </CardContent>
         </Card>
       )}
@@ -287,8 +274,8 @@ function ProfileTab({
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-xs text-slate-400">
-              Use your API key to connect CorLens to Claude via the MCP server,
-              or to call the REST API programmatically. See the{" "}
+              Use your API key to connect CorLens to Claude via the MCP server, or to call the REST
+              API programmatically. See the{" "}
               <button
                 onClick={() => navigate("/developers?tab=mcp")}
                 className="text-xrp-400 hover:underline"
@@ -346,11 +333,7 @@ function ProfileTab({
                 </div>
               </div>
             ) : (
-              <Button
-                onClick={() => handleGenerateApiKey()}
-                disabled={apiKeyLoading}
-                size="sm"
-              >
+              <Button onClick={() => handleGenerateApiKey()} disabled={apiKeyLoading} size="sm">
                 {apiKeyLoading ? "Generating..." : "Generate API Key"}
               </Button>
             )}
@@ -362,12 +345,10 @@ function ProfileTab({
         <Card>
           <CardContent className="py-6 text-center">
             <p className="text-sm text-slate-400 mb-4">
-              Upgrade to Premium to unlock Safe Path Agent, Compliance Reports,
-              MCP Server access, and more.
+              Upgrade to Premium to unlock Safe Path Agent, Compliance Reports, MCP Server access,
+              and more.
             </p>
-            <Button onClick={() => navigate("/premium")}>
-              Upgrade to Premium
-            </Button>
+            <Button onClick={() => navigate("/premium")}>Upgrade to Premium</Button>
           </CardContent>
         </Card>
       )}
@@ -377,7 +358,7 @@ function ProfileTab({
           variant="secondary"
           onClick={() => {
             logout();
-            navigate("/landing");
+            navigate("/home");
           }}
           className="text-slate-400 hover:text-red-400"
         >
@@ -422,9 +403,7 @@ function SafePathTab({
       <Card>
         <CardContent className="py-12 text-center">
           <p className="text-slate-400 mb-4">No Safe Path runs yet</p>
-          <Button onClick={() => navigate("/safe-path")}>
-            Run your first Safe Path analysis
-          </Button>
+          <Button onClick={() => navigate("/safe-path")}>Run your first Safe Path analysis</Button>
         </CardContent>
       </Card>
     );
@@ -436,12 +415,12 @@ function SafePathTab({
       {globalRun && (
         <button
           onClick={() => navigate("/safe-path")}
-          className="w-full text-left rounded-lg border border-xrp-500/50 bg-xrp-500/10 px-4 py-3 hover:bg-xrp-500/15 transition-colors"
+          className="w-full text-left border border-xrp-500/50 bg-xrp-500/10 px-4 py-3 hover:bg-xrp-500/15 transition-colors"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {globalRun.running && (
-                <span className="inline-block w-2 h-2 bg-xrp-400 rounded-full animate-pulse" />
+                <span className="inline-block w-2 h-2 bg-xrp-400 animate-pulse" />
               )}
               <span className="text-sm font-medium text-white">
                 {globalRun.srcCcy} &rarr; {globalRun.dstCcy}
@@ -466,7 +445,7 @@ function SafePathTab({
           <button
             key={r.id}
             onClick={() => loadDetail(r.id)}
-            className={`w-full text-left rounded-lg border px-4 py-3 transition-colors ${
+            className={`w-full text-left border px-4 py-3 transition-colors ${
               selectedId === r.id
                 ? "border-xrp-500/50 bg-slate-900/70"
                 : "border-slate-800 bg-slate-900/40 hover:border-slate-600 hover:bg-slate-900/60"
@@ -488,9 +467,7 @@ function SafePathTab({
                 </span>
               </div>
             </div>
-            <p className="text-xs text-slate-400 mt-1 line-clamp-2">
-              {r.reasoning}
-            </p>
+            <p className="text-xs text-slate-400 mt-1 line-clamp-2">{r.reasoning}</p>
           </button>
         ))}
       </div>
@@ -521,9 +498,7 @@ function SafePathTab({
                     </span>
                   </Row>
                   <Row label="Risk Tolerance">
-                    <span className="text-slate-200">
-                      {detail.maxRiskTolerance}
-                    </span>
+                    <span className="text-slate-200">{detail.maxRiskTolerance}</span>
                   </Row>
                   <Row label="Verdict">
                     <VerdictBadge verdict={detail.verdict} />
@@ -534,9 +509,7 @@ function SafePathTab({
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                     Reasoning
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
-                    {detail.reasoning}
-                  </p>
+                  <p className="text-xs text-slate-300 leading-relaxed">{detail.reasoning}</p>
                 </div>
 
                 {detail.reportMarkdown && (
@@ -544,7 +517,7 @@ function SafePathTab({
                     <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">
                       Compliance Report Preview
                     </div>
-                    <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-800 bg-[#0f172a] p-4 text-xs text-slate-400 leading-relaxed whitespace-pre-wrap">
+                    <div className="max-h-48 overflow-y-auto border border-slate-800 bg-[#070B14] p-4 text-xs text-slate-400 leading-relaxed whitespace-pre-wrap">
                       {detail.reportMarkdown.slice(0, 600)}
                       {detail.reportMarkdown.length > 600 && "..."}
                     </div>
@@ -573,10 +546,7 @@ function SafePathTab({
                 )}
 
                 <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => navigate(`/safe-path?runId=${detail.id}`)}
-                  >
+                  <Button size="sm" onClick={() => navigate(`/safe-path?runId=${detail.id}`)}>
                     View full analysis
                   </Button>
                   <Button
@@ -614,9 +584,7 @@ function AnalysesTab({
       <Card>
         <CardContent className="py-12 text-center">
           <p className="text-slate-400 mb-4">No analyses yet</p>
-          <Button onClick={() => navigate("/analyze")}>
-            Start your first audit
-          </Button>
+          <Button onClick={() => navigate("/analyze")}>Start your first audit</Button>
         </CardContent>
       </Card>
     );
@@ -632,16 +600,14 @@ function AnalysesTab({
             else if (a.status === "running" || a.status === "queued")
               navigate(`/analyze?id=${a.id}`);
           }}
-          className="w-full text-left rounded-lg border border-slate-800 bg-slate-900/40 px-4 py-3 hover:border-slate-600 hover:bg-slate-900/60 transition-colors"
+          className="w-full text-left border border-slate-800 bg-slate-900/40 px-4 py-3 hover:border-slate-600 hover:bg-slate-900/60 transition-colors"
         >
           <div className="flex items-center justify-between">
             <div>
               <span className="font-mono text-sm text-slate-200">
                 {a.seedLabel || a.seedAddress.slice(0, 12) + "..."}
               </span>
-              <span className="ml-2 text-xs text-slate-500">
-                depth {a.depth}
-              </span>
+              <span className="ml-2 text-xs text-slate-500">depth {a.depth}</span>
             </div>
             <div className="flex items-center gap-2">
               <StatusBadge status={a.status} />
@@ -650,9 +616,7 @@ function AnalysesTab({
               </span>
             </div>
           </div>
-          {a.error && (
-            <p className="text-xs text-red-400 mt-1">{a.error}</p>
-          )}
+          {a.error && <p className="text-xs text-red-400 mt-1">{a.error}</p>}
         </button>
       ))}
     </div>
@@ -686,7 +650,7 @@ function StatusBadge({ status }: { status: string }) {
 
   return (
     <span
-      className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border ${
+      className={`inline-flex px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.1em] border ${
         styles[status] || styles.queued
       }`}
     >
@@ -705,7 +669,7 @@ function VerdictBadge({ verdict }: { verdict: string }) {
 
   return (
     <span
-      className={`inline-flex px-2 py-0.5 text-[10px] font-medium rounded-full border ${
+      className={`inline-flex px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.1em] border ${
         styles[verdict] || styles.NO_PATHS
       }`}
     >

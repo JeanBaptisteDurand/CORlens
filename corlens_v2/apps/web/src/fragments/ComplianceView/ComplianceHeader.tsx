@@ -23,21 +23,14 @@ export function ComplianceHeader({
     <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
       <div>
         <h1 className="text-2xl font-bold text-white">Compliance Report</h1>
-        {analysisId && (
-          <p className="mt-1 font-mono text-xs text-slate-500">{analysisId}</p>
-        )}
+        {analysisId && <p className="mt-1 font-mono text-xs text-slate-500">{analysisId}</p>}
       </div>
       <div className="flex flex-wrap items-center gap-3">
         <Button variant="ghost" size="sm" onClick={onBack}>
           Back to Graph
         </Button>
 
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={onGenerate}
-          disabled={isGenerating}
-        >
+        <Button variant="secondary" size="sm" onClick={onGenerate} disabled={isGenerating}>
           {isGenerating ? "Generating…" : "Generate Report"}
         </Button>
 

@@ -77,7 +77,7 @@ function RecentAudits() {
             <Link
               key={a.id}
               to={`/graph/${a.id}`}
-              className="flex items-center justify-between px-3 py-2 rounded-lg border border-slate-800 hover:border-slate-600 hover:bg-slate-900/50 transition-colors group"
+              className="flex items-center justify-between px-3 py-2 border border-slate-800 hover:border-slate-600 hover:bg-slate-900/50 transition-colors group"
             >
               <div className="min-w-0">
                 <div className="text-sm font-medium text-white group-hover:text-xrp-400 transition-colors truncate">
@@ -198,9 +198,9 @@ function EntityForm({
                     type="button"
                     onClick={() => setDepth(opt.v)}
                     disabled={isPolling}
-                    className={`flex-1 rounded-md border px-3 py-2 text-left transition ${
+                    className={`flex-1 border px-3 py-2 text-left transition ${
                       depth === opt.v
-                        ? "border-xrp-500 bg-xrp-500/10"
+                        ? "border-xrp-400 bg-xrp-400/10"
                         : "border-slate-700 hover:border-slate-600"
                     } ${isPolling ? "opacity-50 cursor-not-allowed" : ""}`}
                   >

@@ -12,8 +12,8 @@ export function PremiumGate({ children }: { children: ReactNode }): JSX.Element 
       <div className="relative">
         <div className="pointer-events-none opacity-20 blur-sm select-none">{children}</div>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-          <div className="app-glass-surface rounded-2xl px-8 py-10 text-center max-w-sm">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[color:color-mix(in_srgb,var(--page-accent-500)_16%,transparent)] border border-[color:color-mix(in_srgb,var(--page-accent-400)_30%,transparent)]">
+          <div className="app-glass-surface px-8 py-10 text-center max-w-sm">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center bg-[color:color-mix(in_srgb,var(--page-accent-500)_16%,transparent)] border border-[color:color-mix(in_srgb,var(--page-accent-400)_30%,transparent)]">
               <svg
                 className="h-5 w-5 text-[color:var(--page-accent-400)]"
                 viewBox="0 0 20 20"

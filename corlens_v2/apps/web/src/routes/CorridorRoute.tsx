@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import type { CorridorListItem } from "../lib/core-types.js";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { api } from "../api/index.js";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import type { CorridorListItem } from "../lib/core-types.js";
 
 // ─── Corridor Route Calculator ───────────────────────────────────────────
 //
@@ -39,16 +39,16 @@ function rankActors(list: CorridorListItem["sourceActors"] = []) {
   return scored.map((s) => s.a);
 }
 
-function statusGradient(status: string): string {
+function statusFill(status: string): string {
   switch (status) {
     case "GREEN":
-      return "from-emerald-500/15 to-emerald-500/5 border-emerald-500/40";
+      return "bg-emerald-500/10 border-emerald-500/40";
     case "AMBER":
-      return "from-amber-500/15 to-amber-500/5 border-amber-500/40";
+      return "bg-amber-500/10 border-amber-500/40";
     case "RED":
-      return "from-red-500/15 to-red-500/5 border-red-500/40";
+      return "bg-red-500/10 border-red-500/40";
     default:
-      return "from-slate-700/15 to-slate-700/5 border-slate-700";
+      return "bg-slate-700/10 border-slate-700";
   }
 }
 
@@ -128,14 +128,8 @@ export default function CorridorRoute() {
     return Array.from(set).sort();
   }, [allCorridors]);
 
-  const topSrcActors = useMemo(
-    () => rankActors(corridor?.sourceActors).slice(0, 3),
-    [corridor],
-  );
-  const topDstActors = useMemo(
-    () => rankActors(corridor?.destActors).slice(0, 3),
-    [corridor],
-  );
+  const topSrcActors = useMemo(() => rankActors(corridor?.sourceActors).slice(0, 3), [corridor]);
+  const topDstActors = useMemo(() => rankActors(corridor?.destActors).slice(0, 3), [corridor]);
 
   const submit = () => {
     setParams({
@@ -161,15 +155,7 @@ export default function CorridorRoute() {
     : null;
 
   return (
-    <div className="relative min-h-[calc(100vh-3.5rem)]">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(14,165,233,0.18) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(2,132,199,0.10) 0%, transparent 60%)",
-        }}
-      />
+    <div className="relative min-h-[calc(100vh-3.5rem)] bg-[#070B14]">
       <div className="max-w-4xl mx-auto px-6 py-10 pb-28">
         <button
           onClick={() => navigate("/corridors")}
@@ -178,16 +164,14 @@ export default function CorridorRoute() {
           ← Corridor atlas
         </button>
 
-        <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-300/80">
+        <div className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-300/80">
           Route calculator
         </div>
-        <h1 className="text-3xl font-bold text-white mb-1">
-          Which XRPL corridor should I use?
-        </h1>
+        <h1 className="text-3xl font-bold text-white mb-1">Which XRPL corridor should I use?</h1>
         <p className="text-sm text-slate-400 mb-8 max-w-2xl">
-          Pick a source currency, destination, and amount. CorLens tells you
-          which corridor in the atlas matches, classifies how it settles on
-          XRPL, and ranks the top real-world partners on each leg.
+          Pick a source currency, destination, and amount. CorLens tells you which corridor in the
+          atlas matches, classifies how it settles on XRPL, and ranks the top real-world partners on
+          each leg.
         </p>
 
         {/* ── Input form ── */}
@@ -208,7 +192,7 @@ export default function CorridorRoute() {
               <button
                 type="button"
                 onClick={swap}
-                className="mb-1 rounded border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 hover:border-xrp-500 hover:text-white"
+                className="mb-1 border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 hover:border-xrp-400 hover:text-white"
                 title="Swap source and destination"
                 data-testid="route-swap"
               >
@@ -234,15 +218,11 @@ export default function CorridorRoute() {
                   value={amountInput}
                   onChange={(e) => setAmountInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && submit()}
-                  className="w-32 rounded border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-500 focus:outline-none"
+                  className="w-32 border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-400 focus:outline-none"
                   data-testid="route-amount"
                 />
               </div>
-              <Button
-                onClick={submit}
-                className="mb-0"
-                data-testid="route-submit"
-              >
+              <Button onClick={submit} className="mb-0" data-testid="route-submit">
                 Route
               </Button>
             </div>
@@ -264,7 +244,7 @@ export default function CorridorRoute() {
                     setAmountInput(a);
                     setParams({ from: f, to: t, amount: a });
                   }}
-                  className="rounded border border-slate-800 px-2 py-0.5 text-slate-400 hover:border-xrp-500 hover:text-white font-mono"
+                  className="border border-slate-800 px-2 py-0.5 text-slate-400 hover:border-xrp-400 hover:text-white font-mono"
                 >
                   {f}→{t}
                 </button>
@@ -274,9 +254,7 @@ export default function CorridorRoute() {
         </Card>
 
         {/* ── Result ── */}
-        {loading && (
-          <div className="text-slate-500 text-sm">Loading atlas…</div>
-        )}
+        {loading && <div className="text-slate-500 text-sm">Loading atlas…</div>}
 
         {!loading && !corridor && (
           <Card>
@@ -286,14 +264,11 @@ export default function CorridorRoute() {
                 No corridor in the atlas for {fromParam} → {toParam}
               </div>
               <div className="text-xs text-slate-500 mb-4">
-                Either one of these currencies has no actors in the research
-                atlas yet, or the pair is sanctioned / banned (e.g. RUB).
-                Try swapping the direction or picking another currency.
+                Either one of these currencies has no actors in the research atlas yet, or the pair
+                is sanctioned / banned (e.g. RUB). Try swapping the direction or picking another
+                currency.
               </div>
-              <Button
-                variant="secondary"
-                onClick={() => navigate("/corridors")}
-              >
+              <Button variant="secondary" onClick={() => navigate("/corridors")}>
                 Browse all corridors
               </Button>
             </CardContent>
@@ -304,7 +279,7 @@ export default function CorridorRoute() {
           <>
             {/* Verdict card */}
             <div
-              className={`rounded-2xl border bg-gradient-to-br px-6 py-5 mb-4 ${statusGradient(corridor.status)}`}
+              className={`border px-6 py-5 mb-4 ${statusFill(corridor.status)}`}
               data-testid="route-verdict"
             >
               <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -320,10 +295,7 @@ export default function CorridorRoute() {
                   </div>
                   <div className="text-xs text-slate-300 mt-1">
                     {statusText(corridor.status)} · via{" "}
-                    <span className="font-mono">
-                      {corridor.bridgeAsset ?? "RLUSD"}
-                    </span>{" "}
-                    on XRPL
+                    <span className="font-mono">{corridor.bridgeAsset ?? "RLUSD"}</span> on XRPL
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -335,13 +307,13 @@ export default function CorridorRoute() {
                     Corridor detail →
                   </Button>
                   <Button
+                    variant="secondary"
                     onClick={() =>
                       navigate(
                         `/safe-path?srcCcy=${encodeURIComponent(fromParam)}&dstCcy=${encodeURIComponent(toParam)}&amount=${encodeURIComponent(amountParam)}`,
                       )
                     }
                     data-testid="route-ai-agent"
-                    className="bg-gradient-to-r from-cyan-600 to-sky-600 hover:from-cyan-500 hover:to-sky-500 text-white border-0"
                   >
                     Validate with AI Agent →
                   </Button>
@@ -351,14 +323,8 @@ export default function CorridorRoute() {
 
             {/* Top partners */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <PartnerColumn
-                title={`Best ${fromParam} on-ramps`}
-                actors={topSrcActors}
-              />
-              <PartnerColumn
-                title={`Best ${toParam} off-ramps`}
-                actors={topDstActors}
-              />
+              <PartnerColumn title={`Best ${fromParam} on-ramps`} actors={topSrcActors} />
+              <PartnerColumn title={`Best ${toParam} off-ramps`} actors={topDstActors} />
             </div>
 
             {/* How this route settles — one paragraph narrative */}
@@ -369,10 +335,9 @@ export default function CorridorRoute() {
               <CardContent className="text-xs text-slate-300 leading-relaxed">
                 {corridor.category === "off-chain-bridge" ? (
                   <>
-                    There are no on-chain IOU trust lines between {fromParam}{" "}
-                    and {toParam}, so XRPL path_find cannot quote this lane
-                    directly. Instead the flow is:
-                    <span className="block mt-2 font-mono text-[11px] bg-slate-900/60 rounded px-3 py-2 border border-slate-800">
+                    There are no on-chain IOU trust lines between {fromParam} and {toParam}, so XRPL
+                    path_find cannot quote this lane directly. Instead the flow is:
+                    <span className="block mt-2 font-mono text-[11px] bg-slate-900/60 px-3 py-2 border border-slate-800">
                       {amountParam} {fromParam} →{" "}
                       <span className="text-emerald-300">
                         {topSrcActors[0]?.name ?? "source partner"}
@@ -388,25 +353,23 @@ export default function CorridorRoute() {
                       → {toParam}
                     </span>
                     <span className="block mt-2 text-slate-400">
-                      Status is derived from real-world partner quality
-                      (ODL + RLUSD + breadth), not on-ledger depth.
-                      Production-ready rails (GREEN) have Ripple ODL
-                      partners on both sides.
+                      Status is derived from real-world partner quality (ODL + RLUSD + breadth), not
+                      on-ledger depth. Production-ready rails (GREEN) have Ripple ODL partners on
+                      both sides.
                     </span>
                   </>
                 ) : (
                   <>
-                    This corridor has live on-chain XRPL IOU trust lines.
-                    CorLens runs path_find + liquidity scans against real
-                    orderbooks on every refresh. The winning route is:
-                    <span className="block mt-2 font-mono text-[11px] bg-slate-900/60 rounded px-3 py-2 border border-slate-800">
+                    This corridor has live on-chain XRPL IOU trust lines. CorLens runs path_find +
+                    liquidity scans against real orderbooks on every refresh. The winning route is:
+                    <span className="block mt-2 font-mono text-[11px] bg-slate-900/60 px-3 py-2 border border-slate-800">
                       {corridor.routeResults?.find((r) => r.isWinner)?.label ??
                         "XRPL direct IOU path"}
                     </span>
                     <span className="block mt-2 text-slate-400">
-                      Status reflects live XRPL orderbook depth and pathfind
-                      results from the last scan. Open the detail page for
-                      the full route comparison and liquidity breakdown.
+                      Status reflects live XRPL orderbook depth and pathfind results from the last
+                      scan. Open the detail page for the full route comparison and liquidity
+                      breakdown.
                     </span>
                   </>
                 )}
@@ -436,7 +399,7 @@ function CurrencySelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-500 focus:outline-none"
+      className="w-full border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-400 focus:outline-none"
       data-testid={testid}
     >
       {options.map((opt) => (
@@ -469,10 +432,10 @@ function PartnerColumn({
           actors.map((a, idx) => (
             <div
               key={a.key}
-              className="rounded border border-slate-800 bg-slate-900/40 px-3 py-2 flex items-start gap-2"
+              className="border border-slate-800 bg-slate-900/40 px-3 py-2 flex items-start gap-2"
             >
               <div
-                className={`mt-0.5 w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                className={`mt-0.5 w-5 h-5 flex items-center justify-center text-[10px] font-bold ${
                   idx === 0
                     ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
                     : "bg-slate-800 text-slate-400 border border-slate-700"
@@ -482,13 +445,9 @@ function PartnerColumn({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-sm font-semibold text-white truncate">
-                    {a.name}
-                  </span>
+                  <span className="text-sm font-semibold text-white truncate">{a.name}</span>
                   {a.country && (
-                    <span className="font-mono text-[9px] text-slate-500">
-                      {a.country}
-                    </span>
+                    <span className="font-mono text-[9px] text-slate-500">{a.country}</span>
                   )}
                 </div>
                 <div className="mt-0.5 flex items-center gap-1 text-[9px] uppercase tracking-wider">
@@ -499,7 +458,10 @@ function PartnerColumn({
                     </Badge>
                   )}
                   {a.supportsRlusd && (
-                    <Badge variant="low" className="text-[9px] px-1 py-0 bg-emerald-500/15 text-emerald-300 border-emerald-500/40">
+                    <Badge
+                      variant="low"
+                      className="text-[9px] px-1 py-0 bg-emerald-500/15 text-emerald-300 border-emerald-500/40"
+                    >
                       RLUSD
                     </Badge>
                   )}
@@ -509,11 +471,7 @@ function PartnerColumn({
                     </Badge>
                   )}
                 </div>
-                {a.note && (
-                  <div className="text-[10px] text-slate-400 mt-1">
-                    {a.note}
-                  </div>
-                )}
+                {a.note && <div className="text-[10px] text-slate-400 mt-1">{a.note}</div>}
               </div>
             </div>
           ))

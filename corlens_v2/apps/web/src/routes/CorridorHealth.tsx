@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { CorridorListItem } from "../lib/core-types.js";
 import { api } from "../api/index.js";
-import { Card, CardContent } from "../components/ui/card";
+import { CorridorChatBubble } from "../components/corridors/CorridorChatBubble";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { CorridorChatBubble } from "../components/corridors/CorridorChatBubble";
-import { CorridorGlobe } from "../components/corridors/CorridorGlobe";
-import { SelectFilter } from "../fragments/CorridorHealth/SelectFilter";
+import { Card, CardContent } from "../components/ui/card";
+import { Input } from "../components/ui/input";
 import { CorridorCard } from "../fragments/CorridorHealth/CorridorCard";
+import { SelectFilter } from "../fragments/CorridorHealth/SelectFilter";
+import type { CorridorListItem } from "../lib/core-types.js";
 
 // ─── Corridor Atlas (pair view) ─────────────────────────────────────────
 // Each card represents a fiat-pair corridor (USD→EUR, USD→CNY, …). The
@@ -69,10 +69,7 @@ export default function CorridorHealth() {
     () => uniqueSorted(corridors.map((c) => c.dest.symbol)),
     [corridors],
   );
-  const optionRegions = useMemo(
-    () => uniqueSorted(corridors.map((c) => c.region)),
-    [corridors],
-  );
+  const optionRegions = useMemo(() => uniqueSorted(corridors.map((c) => c.region)), [corridors]);
   const optionCategories = useMemo(
     () => uniqueSorted(corridors.map((c) => c.category)),
     [corridors],
@@ -83,8 +80,7 @@ export default function CorridorHealth() {
     return corridors
       .filter((c) => {
         if (status !== "ALL" && c.status !== status) return false;
-        if (currencyFrom !== "ALL" && c.source.symbol !== currencyFrom)
-          return false;
+        if (currencyFrom !== "ALL" && c.source.symbol !== currencyFrom) return false;
         if (currencyTo !== "ALL" && c.dest.symbol !== currencyTo) return false;
         if (region !== "ALL" && c.region !== region) return false;
         if (category !== "ALL" && c.category !== category) return false;
@@ -114,35 +110,19 @@ export default function CorridorHealth() {
   };
 
   return (
-    <div className="app-content-min-height relative overflow-hidden">
-      <div
-        aria-hidden
-        className="route-atmosphere pointer-events-none absolute inset-0 -z-10"
-      />
-
+    <div className="app-content-min-height relative overflow-hidden bg-[#070B14]">
       <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className="mb-6">
-          <div className="text-xs font-bold uppercase tracking-widest text-xrp-400 mb-2">
+        <div className="mb-8">
+          <div className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-xrp-400 mb-2">
             2,436 live corridors · 48 currencies · ~200 actors
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            XRPL Corridor Atlas
-          </h1>
+          <h1 className="text-3xl font-bold text-white mb-2">XRPL Corridor Atlas</h1>
           <p className="text-slate-400 text-sm max-w-2xl">
-            Every fiat-to-fiat lane that can settle through XRPL — classified
-            by how it actually moves money: native IOU orderbooks, hybrid
-            legacy, or off-chain RLUSD bridge via named partners. Click any
-            corridor for AI commentary, 30-day status history, and the full
+            Every fiat-to-fiat lane that can settle through XRPL — classified by how it actually
+            moves money: native IOU orderbooks, hybrid legacy, or off-chain RLUSD bridge via named
+            partners. Click any corridor for AI commentary, 30-day status history, and the full
             real-world actor registry.
           </p>
-        </div>
-
-        {/* ─── 3D Globe — fiat-fiat corridor network ─── */}
-        <div className="mb-8">
-          <CorridorGlobe
-            corridors={corridors}
-            onCorridorClick={(id) => navigate(`/corridors/${id}`)}
-          />
         </div>
 
         {/* ─── Filter bar ─── */}
@@ -150,16 +130,14 @@ export default function CorridorHealth() {
           <CardContent className="p-4 space-y-3">
             <div className="flex flex-wrap items-end gap-3">
               <div className="flex-1 min-w-[220px]">
-                <label className="text-[10px] uppercase tracking-wide text-slate-500 block mb-1">
-                  Search
-                </label>
-                <input
+                <Input
                   data-testid="filter-search"
                   type="text"
+                  label="Search"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="e.g. RLUSD, RippleFox, on-ramp…"
-                  className="w-full bg-slate-900/60 border border-slate-800 rounded px-3 py-1.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-xrp-500"
+                  className="py-1.5"
                 />
               </div>
               <SelectFilter
@@ -196,23 +174,15 @@ export default function CorridorHealth() {
                   Status
                 </label>
                 <div className="flex gap-1" data-testid="filter-status">
-                  {(
-                    [
-                      "ALL",
-                      "GREEN",
-                      "AMBER",
-                      "RED",
-                      "UNKNOWN",
-                    ] as StatusFilter[]
-                  ).map((s) => (
+                  {(["ALL", "GREEN", "AMBER", "RED", "UNKNOWN"] as StatusFilter[]).map((s) => (
                     <button
                       key={s}
                       onClick={() => setStatus(s)}
                       data-testid={`status-${s}`}
-                      className={`px-2 py-1 text-[10px] font-bold tracking-wide rounded border transition ${
+                      className={`px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-wide border transition ${
                         status === s
-                          ? "border-xrp-500 bg-xrp-500/20 text-xrp-300"
-                          : "border-slate-700 text-slate-400 hover:border-slate-500"
+                          ? "border-xrp-400 bg-xrp-500/20 text-xrp-300"
+                          : "border-[color:var(--app-glass-panel-border)] text-slate-400 hover:border-slate-500"
                       }`}
                     >
                       {s}
@@ -245,9 +215,7 @@ export default function CorridorHealth() {
             Loading corridor atlas…
           </div>
         )}
-        {error && !loading && (
-          <div className="py-6 text-sm text-red-400">{error}</div>
-        )}
+        {error && !loading && <div className="py-6 text-sm text-red-400">{error}</div>}
         {!loading && !error && filtered.length === 0 && (
           <div className="py-12 text-center text-sm text-slate-500">
             No corridors match these filters.
@@ -255,11 +223,7 @@ export default function CorridorHealth() {
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((c) => (
-            <CorridorCard
-              key={c.id}
-              item={c}
-              onClick={() => navigate(`/corridors/${c.id}`)}
-            />
+            <CorridorCard key={c.id} item={c} onClick={() => navigate(`/corridors/${c.id}`)} />
           ))}
         </div>
       </div>

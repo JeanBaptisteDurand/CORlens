@@ -7,7 +7,7 @@ export function FloatingGraphChatButton({ onOpen }: FloatingGraphChatButtonProps
     <button
       type="button"
       onClick={onOpen}
-      className="absolute bottom-6 right-6 z-20 flex items-center gap-2 rounded-full border border-xrp-500/60 bg-slate-950/95 px-5 py-3 text-sm font-semibold text-xrp-300 shadow-lg shadow-xrp-900/40 backdrop-blur transition hover:scale-105 hover:border-xrp-400"
+      className="absolute bottom-6 right-6 z-20 flex items-center gap-2 border border-[color:var(--page-accent-400)] bg-slate-950/95 px-5 py-3 text-sm font-semibold text-xrp-300 shadow-[0_0_1px_var(--page-accent-400),0_0_16px_rgba(110,163,255,0.35)] transition hover:scale-105"
     >
       <svg
         aria-hidden="true"

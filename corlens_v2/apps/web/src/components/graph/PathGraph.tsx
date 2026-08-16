@@ -31,10 +31,10 @@ const COLORS = {
   hop: "#334155",
   recommended: "#10b981",
   xrplDefault: "#0ea5e9",
-  neutral: "#475569",
+  neutral: "#5A6483",
   riskHigh: "#ef4444",
   riskMed: "#f59e0b",
-  riskLow: "#64748b",
+  riskLow: "#7C8AA0",
 };
 
 export interface PathGraphProps {
@@ -114,10 +114,10 @@ export function PathGraph({
             <div style={{ fontSize: 9, color: COLORS.source, fontWeight: 700, letterSpacing: 1 }}>
               SOURCE
             </div>
-            <div style={{ fontSize: 12, color: "#f8fafc", fontWeight: 600 }}>
+            <div style={{ fontSize: 12, color: "#F4F6FA", fontWeight: 600 }}>
               {analysis.request.sourceCurrency}
             </div>
-            <div style={{ fontSize: 9, color: "#94a3b8", fontFamily: "monospace" }}>
+            <div style={{ fontSize: 9, color: "#8A93A6", fontFamily: "monospace" }}>
               {analysis.request.sourceIssuer
                 ? shortAddress(analysis.request.sourceIssuer)
                 : "native"}
@@ -126,9 +126,8 @@ export function PathGraph({
         ),
       },
       style: {
-        background: "#0f172a",
+        background: "#0B0F1C",
         border: `2px solid ${COLORS.source}`,
-        borderRadius: 8,
         width: 120,
         padding: 8,
       },
@@ -150,19 +149,18 @@ export function PathGraph({
             <div style={{ fontSize: 9, color: COLORS.dest, fontWeight: 700, letterSpacing: 1 }}>
               DESTINATION
             </div>
-            <div style={{ fontSize: 12, color: "#f8fafc", fontWeight: 600 }}>
+            <div style={{ fontSize: 12, color: "#F4F6FA", fontWeight: 600 }}>
               {analysis.request.destCurrency}
             </div>
-            <div style={{ fontSize: 9, color: "#94a3b8", fontFamily: "monospace" }}>
+            <div style={{ fontSize: 9, color: "#8A93A6", fontFamily: "monospace" }}>
               {shortAddress(analysis.request.destIssuer)}
             </div>
           </div>
         ),
       },
       style: {
-        background: "#0f172a",
+        background: "#0B0F1C",
         border: `2px solid ${COLORS.dest}`,
-        borderRadius: 8,
         width: 120,
         padding: 8,
       },
@@ -225,7 +223,7 @@ export function PathGraph({
                 <div
                   style={{
                     fontSize: 10,
-                    color: "#e2e8f0",
+                    color: "#E4E7F0",
                     whiteSpace: "pre",
                     lineHeight: 1.1,
                   }}
@@ -248,9 +246,8 @@ export function PathGraph({
             ),
           },
           style: {
-            background: "#020617",
+            background: "#020409",
             border: `1.5px solid ${borderColor}`,
-            borderRadius: 6,
             width: 90,
             padding: 4,
             opacity,
@@ -287,7 +284,7 @@ export function PathGraph({
           fontWeight: 700,
         },
         labelBgStyle: {
-          fill: "#020617",
+          fill: "#020409",
           opacity: 0.85,
         },
       });
@@ -301,13 +298,12 @@ export function PathGraph({
       <div
         style={{
           height,
-          background: "#020617",
-          border: "1px solid #1e293b",
-          borderRadius: 8,
+          background: "#020409",
+          border: "1px solid rgba(244,246,250,0.14)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#475569",
+          color: "#5A6483",
           fontSize: 12,
         }}
       >
@@ -321,9 +317,8 @@ export function PathGraph({
       data-testid="path-graph"
       style={{
         height,
-        background: "#020617",
-        border: "1px solid #1e293b",
-        borderRadius: 8,
+        background: "#020409",
+        border: "1px solid rgba(244,246,250,0.14)",
         overflow: "hidden",
         position: "relative",
       }}
@@ -339,7 +334,12 @@ export function PathGraph({
         nodesConnectable={false}
         proOptions={{ hideAttribution: true }}
       >
-        <Background variant={BackgroundVariant.Dots} color="#1e293b" gap={24} size={1} />
+        <Background
+          variant={BackgroundVariant.Dots}
+          color="rgba(244,246,250,0.14)"
+          gap={24}
+          size={1}
+        />
         <Controls showInteractive={false} position="bottom-right" />
       </ReactFlow>
       {/* Legend overlay */}
@@ -352,10 +352,9 @@ export function PathGraph({
           gap: 8,
           fontSize: 9,
           background: "rgba(2, 6, 23, 0.9)",
-          border: "1px solid #1e293b",
-          borderRadius: 6,
+          border: "1px solid rgba(244,246,250,0.14)",
           padding: "4px 8px",
-          color: "#94a3b8",
+          color: "#8A93A6",
         }}
       >
         <Legend swatch={COLORS.recommended} label="Recommended (safest)" />
@@ -374,7 +373,6 @@ function Legend({ swatch, label }: { swatch: string; label: string }) {
           width: 14,
           height: 3,
           background: swatch,
-          borderRadius: 1,
           flexShrink: 0,
         }}
       />

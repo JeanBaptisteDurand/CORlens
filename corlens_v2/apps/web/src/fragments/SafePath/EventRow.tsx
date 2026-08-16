@@ -10,9 +10,7 @@ export function EventRow({ event }: EventRowProps) {
       return (
         <div className="text-xrp-300">
           ▸ <span className="font-semibold">{event.step}</span>
-          {event.detail && (
-            <span className="text-slate-400"> - {event.detail}</span>
-          )}
+          {event.detail && <span className="text-slate-400"> - {event.detail}</span>}
         </div>
       );
     case "tool_call":
@@ -31,11 +29,7 @@ export function EventRow({ event }: EventRowProps) {
     case "reasoning":
       return <div className="italic text-slate-200">{event.text}</div>;
     case "result":
-      return (
-        <div className="font-semibold text-xrp-300">
-          ★ verdict: {event.result.verdict}
-        </div>
-      );
+      return <div className="font-semibold text-xrp-300">★ verdict: {event.result.verdict}</div>;
     case "error":
       return <div className="text-red-400">✗ {event.error}</div>;
     default:

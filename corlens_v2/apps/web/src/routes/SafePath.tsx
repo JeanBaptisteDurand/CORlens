@@ -1,6 +1,5 @@
-import { useState, useRef, useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { getActiveRun, subscribe as subscribeStore, startGlobalRun, clearActiveRun } from "../stores/safePathStore";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -12,23 +11,24 @@ import ReactFlow, {
   type Edge,
   MarkerType,
 } from "reactflow";
-import "reactflow/dist/style.css";
-import type {
-  CorridorAnalysis,
-  CorridorPath,
-  CorridorPairDef,
-  RiskSeverity,
-} from "../lib/core-types.js";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
+  clearActiveRun,
+  getActiveRun,
+  startGlobalRun,
+  subscribe as subscribeStore,
+} from "../stores/safePathStore";
+import "reactflow/dist/style.css";
 import { api } from "../api/index.js";
 import { PremiumGate } from "../components/ui/PremiumGate";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import type {
+  CorridorAnalysis,
+  CorridorPairDef,
+  CorridorPath,
+  RiskSeverity,
+} from "../lib/core-types.js";
 
 // ─── Event types (mirror server) ─────────────────────────────────────────
 type SafePathEvent =
@@ -129,11 +129,11 @@ const ROW_GAP = 90;
 
 const BASE_STYLE: React.CSSProperties = {
   padding: 12,
-  borderRadius: 10,
+  borderRadius: 0,
   fontSize: 11,
   fontFamily: "monospace",
-  color: "#e2e8f0",
-  border: "1px solid #334155",
+  color: "#F4F6FA",
+  border: "1px solid rgba(244,246,250,0.14)",
   textAlign: "center",
 };
 
@@ -161,9 +161,7 @@ function categoryLabel(cat: string): string {
   }
 }
 
-function categoryBadgeVariant(
-  cat: string,
-): "default" | "high" | "med" | "low" | "info" {
+function categoryBadgeVariant(cat: string): "default" | "high" | "med" | "low" | "info" {
   if (cat === "off-chain-bridge") return "med";
   if (cat === "fiat-fiat") return "info";
   return "default";
@@ -230,13 +228,8 @@ function renderMdLine(line: string, idx: number): React.ReactNode {
         className="flex gap-3 items-start py-1"
         style={{ paddingLeft: indent * 4 + 4 }}
       >
-        <span
-          className="mt-[5px] shrink-0 rounded-full"
-          style={{ width: 6, height: 6, background: dotColor }}
-        />
-        <span className="text-[12px] text-slate-300 leading-relaxed">
-          {renderInline(content)}
-        </span>
+        <span className="mt-[5px] shrink-0" style={{ width: 6, height: 6, background: dotColor }} />
+        <span className="text-[12px] text-slate-300 leading-relaxed">{renderInline(content)}</span>
       </div>
     );
   }
@@ -265,19 +258,28 @@ function renderInline(text: string): React.ReactNode {
     const m = match[0];
     if (m === "[HIGH]") {
       parts.push(
-        <span key={ki++} className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-500/15 text-red-400 border border-red-500/30">
+        <span
+          key={ki++}
+          className="inline-block px-1.5 py-0.5 text-[9px] font-bold font-mono bg-red-500/15 text-red-400 border border-red-500/30"
+        >
           HIGH
         </span>,
       );
     } else if (m === "[MED]") {
       parts.push(
-        <span key={ki++} className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+        <span
+          key={ki++}
+          className="inline-block px-1.5 py-0.5 text-[9px] font-bold font-mono bg-amber-500/15 text-amber-400 border border-amber-500/30"
+        >
           MED
         </span>,
       );
     } else if (m === "[LOW]") {
       parts.push(
-        <span key={ki++} className="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-500/15 text-slate-400 border border-slate-500/30">
+        <span
+          key={ki++}
+          className="inline-block px-1.5 py-0.5 text-[9px] font-bold font-mono bg-slate-500/15 text-slate-400 border border-slate-500/30"
+        >
           LOW
         </span>,
       );
@@ -291,7 +293,7 @@ function renderInline(text: string): React.ReactNode {
       parts.push(
         <code
           key={ki++}
-          className="px-1.5 py-0.5 bg-[#020617] border border-slate-800 rounded text-[10px] font-mono text-xrp-400"
+          className="px-1.5 py-0.5 bg-[#020409] border border-slate-800 text-[10px] font-mono text-xrp-400"
         >
           {m.slice(1, -1)}
         </code>,
@@ -307,12 +309,8 @@ function renderInline(text: string): React.ReactNode {
 export default function SafePath() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [srcCcy, setSrcCcy] = useState(
-    searchParams.get("srcCcy")?.toUpperCase() || "USD",
-  );
-  const [dstCcy, setDstCcy] = useState(
-    searchParams.get("dstCcy")?.toUpperCase() || "MXN",
-  );
+  const [srcCcy, setSrcCcy] = useState(searchParams.get("srcCcy")?.toUpperCase() || "USD");
+  const [dstCcy, setDstCcy] = useState(searchParams.get("dstCcy")?.toUpperCase() || "MXN");
   const [amount, setAmount] = useState(searchParams.get("amount") || "1000");
   const [tolerance, setTolerance] = useState<RiskSeverity>("MED");
 
@@ -321,9 +319,7 @@ export default function SafePath() {
   const [result, setResult] = useState<SafePathResult | null>(null);
   const [report, setReport] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [liveCorridor, setLiveCorridor] = useState<CorridorPairDef | null>(
-    null,
-  );
+  const [liveCorridor, setLiveCorridor] = useState<CorridorPairDef | null>(null);
   const [activePathIndex, setActivePathIndex] = useState<number | undefined>();
   const [analysesSummary, setAnalysesSummary] = useState<
     Array<{
@@ -347,9 +343,7 @@ export default function SafePath() {
   const actorMapRef = useRef(new Map<string, { side: "src" | "dst"; row: number }>());
   const crawledSetRef = useRef(new Set<string>());
   // Track which nodes got rag flash
-  const ragFlashTimerRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
-    new Map(),
-  );
+  const ragFlashTimerRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Currency list from corridor atlas
   const [currencies, setCurrencies] = useState<string[]>([]);
@@ -357,10 +351,8 @@ export default function SafePath() {
     api.listCorridors().then((res) => {
       const set = new Set<string>();
       for (const c of res.corridors) {
-        if (c.source.type === "fiat" || c.source.type === "stable")
-          set.add(c.source.symbol);
-        if (c.dest.type === "fiat" || c.dest.type === "stable")
-          set.add(c.dest.symbol);
+        if (c.source.type === "fiat" || c.source.type === "stable") set.add(c.source.symbol);
+        if (c.dest.type === "fiat" || c.dest.type === "stable") set.add(c.dest.symbol);
       }
       setCurrencies(Array.from(set).sort());
     });
@@ -394,7 +386,7 @@ export default function SafePath() {
 
       const fiatStyle: React.CSSProperties = {
         ...BASE_STYLE,
-        background: "linear-gradient(135deg, #0c4a6e 0%, #0369a1 100%)",
+        background: "#0c4a6e",
         border: "2px solid #0ea5e9",
         width: 120,
         fontSize: 14,
@@ -403,9 +395,8 @@ export default function SafePath() {
       };
       const bridgeStyle: React.CSSProperties = {
         ...BASE_STYLE,
-        background: "linear-gradient(135deg, #064e3b 0%, #065f46 100%)",
+        background: "#064e3b",
         border: "2px solid #10b981",
-        boxShadow: "0 0 24px rgba(16,185,129,0.25)",
         width: 130,
         fontSize: 14,
         fontWeight: 700,
@@ -477,8 +468,8 @@ export default function SafePath() {
 
       const actorStyle = (odl: boolean, rlusd: boolean): React.CSSProperties => ({
         ...BASE_STYLE,
-        background: odl ? "#0c4a6e" : rlusd ? "#064e3b" : "#1e293b",
-        border: `1.5px solid ${odl ? "#38bdf8" : rlusd ? "#34d399" : "#475569"}`,
+        background: odl ? "#0c4a6e" : rlusd ? "#064e3b" : "#12172A",
+        border: `1.5px solid ${odl ? "#38bdf8" : rlusd ? "#34d399" : "#3E465E"}`,
         width: 150,
         fontSize: 10,
         padding: 6,
@@ -489,7 +480,9 @@ export default function SafePath() {
         const nodeId = nid("actor", actor.key);
         actorMapRef.current.set(actor.key, { side: "src", row: i });
         srcActorIdxRef.current = Math.max(srcActorIdxRef.current, i + 1);
-        const tags = [actor.odl ? "ODL" : null, actor.supportsRlusd ? "RLUSD" : null].filter(Boolean).join(" ");
+        const tags = [actor.odl ? "ODL" : null, actor.supportsRlusd ? "RLUSD" : null]
+          .filter(Boolean)
+          .join(" ");
         newNodes.push({
           id: nodeId,
           position: { x: COL_X.srcActors, y: 40 + i * ROW_GAP },
@@ -498,15 +491,19 @@ export default function SafePath() {
         });
         newEdges.push({
           id: `e-${srcId}-${nodeId}`,
-          source: srcId, target: nodeId, type: "smoothstep",
-          style: { stroke: "#475569", strokeWidth: 1 },
+          source: srcId,
+          target: nodeId,
+          type: "smoothstep",
+          style: { stroke: "#3E465E", strokeWidth: 1 },
         });
         newEdges.push({
           id: `e-${nodeId}-${bridgeId}`,
-          source: nodeId, target: bridgeId, type: "smoothstep",
+          source: nodeId,
+          target: bridgeId,
+          type: "smoothstep",
           animated: !!actor.odl || !!actor.supportsRlusd,
           style: {
-            stroke: actor.odl ? "#38bdf8" : actor.supportsRlusd ? "#34d399" : "#475569",
+            stroke: actor.odl ? "#38bdf8" : actor.supportsRlusd ? "#34d399" : "#3E465E",
             strokeWidth: actor.odl ? 2 : 1,
           },
         });
@@ -517,7 +514,9 @@ export default function SafePath() {
         const nodeId = nid("actor", actor.key);
         actorMapRef.current.set(actor.key, { side: "dst", row: i });
         dstActorIdxRef.current = Math.max(dstActorIdxRef.current, i + 1);
-        const tags = [actor.odl ? "ODL" : null, actor.supportsRlusd ? "RLUSD" : null].filter(Boolean).join(" ");
+        const tags = [actor.odl ? "ODL" : null, actor.supportsRlusd ? "RLUSD" : null]
+          .filter(Boolean)
+          .join(" ");
         newNodes.push({
           id: nodeId,
           position: { x: COL_X.dstActors, y: 40 + i * ROW_GAP },
@@ -526,17 +525,21 @@ export default function SafePath() {
         });
         newEdges.push({
           id: `e-${bridgeId}-${nodeId}`,
-          source: bridgeId, target: nodeId, type: "smoothstep",
+          source: bridgeId,
+          target: nodeId,
+          type: "smoothstep",
           animated: !!actor.odl || !!actor.supportsRlusd,
           style: {
-            stroke: actor.odl ? "#38bdf8" : actor.supportsRlusd ? "#34d399" : "#475569",
+            stroke: actor.odl ? "#38bdf8" : actor.supportsRlusd ? "#34d399" : "#3E465E",
             strokeWidth: actor.odl ? 2 : 1,
           },
         });
         newEdges.push({
           id: `e-${nodeId}-${dstId}`,
-          source: nodeId, target: dstId, type: "smoothstep",
-          style: { stroke: "#475569", strokeWidth: 1 },
+          source: nodeId,
+          target: dstId,
+          type: "smoothstep",
+          style: { stroke: "#3E465E", strokeWidth: 1 },
         });
       });
 
@@ -554,12 +557,7 @@ export default function SafePath() {
   );
 
   const addActorNode = useCallback(
-    (
-      label: string,
-      address: string,
-      side: "src" | "dst",
-      pulsing: boolean,
-    ) => {
+    (label: string, address: string, side: "src" | "dst", pulsing: boolean) => {
       const nodeId = nid("actor", address);
       if (actorMapRef.current.has(address)) return;
       const idxRef = side === "src" ? srcActorIdxRef : dstActorIdxRef;
@@ -576,13 +574,9 @@ export default function SafePath() {
         data: { label: `${label}\n${address.slice(0, 8)}...` },
         style: {
           ...BASE_STYLE,
-          background: "#1e293b",
-          border: pulsing
-            ? "2px solid #38bdf8"
-            : "1px solid #475569",
-          boxShadow: pulsing
-            ? "0 0 12px rgba(56,189,248,0.3)"
-            : "none",
+          background: "#12172A",
+          border: pulsing ? "2px solid #38bdf8" : "1px solid #3E465E",
+          boxShadow: pulsing ? "0 0 12px rgba(56,189,248,0.3)" : "none",
           width: 140,
         },
       };
@@ -627,7 +621,7 @@ export default function SafePath() {
                 ...n,
                 style: {
                   ...n.style,
-                  border: "1px solid #475569",
+                  border: "1px solid #3E465E",
                   boxShadow: "none",
                 },
               }
@@ -650,10 +644,7 @@ export default function SafePath() {
         // Update border color
         setRfNodes((prev) =>
           prev.map((n) => {
-            if (
-              n.id === nid("actor", address) ||
-              n.id === nid("account", address)
-            ) {
+            if (n.id === nid("actor", address) || n.id === nid("account", address)) {
               return {
                 ...n,
                 style: {
@@ -671,8 +662,7 @@ export default function SafePath() {
 
       // If we don't have this address as an actor, add as generic account
       if (!actorMapRef.current.has(address)) {
-        const side =
-          crawledSetRef.current.size % 2 === 0 ? "src" : "dst";
+        const side = crawledSetRef.current.size % 2 === 0 ? "src" : "dst";
         const idxRef = side === "src" ? srcActorIdxRef : dstActorIdxRef;
         const row = idxRef.current;
         idxRef.current++;
@@ -681,8 +671,7 @@ export default function SafePath() {
         const colX = side === "src" ? COL_X.srcActors : COL_X.dstActors;
         const yPos = ROW_START + row * ROW_GAP;
         const displayName = name || address.slice(0, 10) + "…";
-        const flagStr =
-          flags.length > 0 ? ` [${flags.length} flag(s)]` : "";
+        const flagStr = flags.length > 0 ? ` [${flags.length} flag(s)]` : "";
 
         const newNode: Node = {
           id: nid("account", address),
@@ -690,7 +679,7 @@ export default function SafePath() {
           data: { label: `${displayName}${flagStr}`, reason, address, name },
           style: {
             ...BASE_STYLE,
-            background: "#1e293b",
+            background: "#12172A",
             border: `2px solid ${riskColor(score)}`,
             width: 140,
           },
@@ -733,14 +722,11 @@ export default function SafePath() {
     (analysisId: string, address: string, nodeCount: number) => {
       const info = actorMapRef.current.get(address);
       if (!info) return;
-      const colX =
-        info.side === "src" ? COL_X.srcActors : COL_X.dstActors;
+      const colX = info.side === "src" ? COL_X.srcActors : COL_X.dstActors;
       const yPos = ROW_START + info.row * ROW_GAP;
 
       const satId = nid("sat", analysisId);
-      const parentId =
-        nid("actor", address) ||
-        nid("account", address);
+      const parentId = nid("actor", address) || nid("account", address);
 
       const satNode: Node = {
         id: satId,
@@ -782,8 +768,8 @@ export default function SafePath() {
                 ...n,
                 style: {
                   ...n.style,
-                  border: "2px solid #22d3ee",
-                  boxShadow: "0 0 16px rgba(34,211,238,0.4)",
+                  border: "2px solid #8FB4FF",
+                  boxShadow: "0 0 16px rgba(143,180,255,0.4)",
                 },
               }
             : n,
@@ -798,9 +784,10 @@ export default function SafePath() {
                   ...n,
                   style: {
                     ...n.style,
-                    border: (n.style as Record<string, unknown>)?.border === "2px solid #22d3ee"
-                      ? "1px solid #475569"
-                      : (n.style as Record<string, string>)?.border ?? "1px solid #475569",
+                    border:
+                      (n.style as Record<string, unknown>)?.border === "2px solid #8FB4FF"
+                        ? "1px solid #3E465E"
+                        : ((n.style as Record<string, string>)?.border ?? "1px solid #3E465E"),
                     boxShadow: "none",
                   },
                 }
@@ -815,10 +802,7 @@ export default function SafePath() {
 
   const updateBridgeSpread = useCallback(
     (snapshot: Record<string, unknown>) => {
-      const spread =
-        typeof snapshot.spreadBps === "number"
-          ? snapshot.spreadBps.toFixed(1)
-          : "?";
+      const spread = typeof snapshot.spreadBps === "number" ? snapshot.spreadBps.toFixed(1) : "?";
       setRfNodes((prev) =>
         prev.map((n) =>
           n.id === "bridge:RLUSD"
@@ -864,7 +848,7 @@ export default function SafePath() {
               },
               style: {
                 ...BASE_STYLE,
-                background: "#1a1a2e",
+                background: "#12172A",
                 border: "1px solid #6366f1",
                 fontSize: 9,
               },
@@ -914,7 +898,7 @@ export default function SafePath() {
                   animated: true,
                   label: "recommended",
                   labelStyle: { fill: "#fbbf24", fontSize: 8, fontWeight: 700 },
-                  labelBgStyle: { fill: "#0f172a", fillOpacity: 0.8 },
+                  labelBgStyle: { fill: "#070B14", fillOpacity: 0.8 },
                 };
               }
               return edge;
@@ -942,7 +926,13 @@ export default function SafePath() {
       } else if (event.type === "path_active") {
         setActivePathIndex(event.pathIndex);
       } else if (event.type === "account_crawled") {
-        addCrawledAccount(event.address, event.name ?? "", event.reason ?? "", event.flags, event.score);
+        addCrawledAccount(
+          event.address,
+          event.name ?? "",
+          event.reason ?? "",
+          event.flags,
+          event.score,
+        );
       } else if (event.type === "web_search") {
         const firstWord = event.query.split(" ")[0].toLowerCase();
         actorMapRef.current.forEach((_, key) => {
@@ -962,7 +952,12 @@ export default function SafePath() {
           if (exists) {
             return prev.map((a) =>
               a.id === event.analysisId
-                ? { ...a, status: "done" as const, nodeCount: event.nodeCount, edgeCount: event.edgeCount }
+                ? {
+                    ...a,
+                    status: "done" as const,
+                    nodeCount: event.nodeCount,
+                    edgeCount: event.edgeCount,
+                  }
                 : a,
             );
           }
@@ -977,7 +972,14 @@ export default function SafePath() {
             `Analysis ${event.analysisId.slice(0, 8)}`;
           return [
             ...prev,
-            { id: event.analysisId, address: "", label, status: "done" as const, nodeCount: event.nodeCount, edgeCount: event.edgeCount },
+            {
+              id: event.analysisId,
+              address: "",
+              label,
+              status: "done" as const,
+              nodeCount: event.nodeCount,
+              edgeCount: event.edgeCount,
+            },
           ];
         });
         setAnalyses((prev) => {
@@ -987,7 +989,8 @@ export default function SafePath() {
         });
       } else if (event.type === "rag_answer") {
         actorMapRef.current.forEach((_, key) => {
-          if (event.question.toLowerCase().includes(key.toLowerCase().slice(0, 6))) flashNodeBorder(key);
+          if (event.question.toLowerCase().includes(key.toLowerCase().slice(0, 6)))
+            flashNodeBorder(key);
         });
       } else if (event.type === "partner_depth") {
         updateBridgeSpread(event.snapshot);
@@ -997,7 +1000,16 @@ export default function SafePath() {
         setAnalysesSummary(event.analyses);
       }
     },
-    [addCorridorSkeleton, addActorNode, settleActorNode, addCrawledAccount, addCorridorPaths, addAnalysisSatellite, flashNodeBorder, updateBridgeSpread],
+    [
+      addCorridorSkeleton,
+      addActorNode,
+      settleActorNode,
+      addCrawledAccount,
+      addCorridorPaths,
+      addAnalysisSatellite,
+      flashNodeBorder,
+      updateBridgeSpread,
+    ],
   );
 
   // ─── Global store sync ──────────────────────────────────────────────────
@@ -1048,30 +1060,33 @@ export default function SafePath() {
   useEffect(() => {
     const runId = searchParams.get("runId");
     if (!runId) return;
-    api.getSafePathRun(runId).then((saved) => {
-      setResult(saved.resultJson as SafePathResult);
-      setReport(saved.reportMarkdown ?? null);
-      setSrcCcy(saved.srcCcy);
-      setDstCcy(saved.dstCcy);
-      setAmount(saved.amount);
-      setRunning(false);
-      setError(null);
-      // Rebuild corridor context from saved result
-      const rj = (saved.resultJson ?? {}) as {
-        corridor?: unknown;
-        corridorAnalysis?: unknown;
-      };
-      if (rj.corridor) {
-        setLiveCorridor(rj.corridor as never);
-        addCorridorSkeleton(rj.corridor as never);
-      }
-      if (rj.corridorAnalysis) {
-        addCorridorPaths(rj.corridorAnalysis as never);
-      }
-    }).catch(() => {
-      setError("Failed to load saved run");
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    api
+      .getSafePathRun(runId)
+      .then((saved) => {
+        setResult(saved.resultJson as SafePathResult);
+        setReport(saved.reportMarkdown ?? null);
+        setSrcCcy(saved.srcCcy);
+        setDstCcy(saved.dstCcy);
+        setAmount(saved.amount);
+        setRunning(false);
+        setError(null);
+        // Rebuild corridor context from saved result
+        const rj = (saved.resultJson ?? {}) as {
+          corridor?: unknown;
+          corridorAnalysis?: unknown;
+        };
+        if (rj.corridor) {
+          setLiveCorridor(rj.corridor as never);
+          addCorridorSkeleton(rj.corridor as never);
+        }
+        if (rj.corridorAnalysis) {
+          addCorridorPaths(rj.corridorAnalysis as never);
+        }
+      })
+      .catch(() => {
+        setError("Failed to load saved run");
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ─── SSE run ──────────────────────────────────────────────────────────
@@ -1098,10 +1113,7 @@ export default function SafePath() {
   }, [report, srcCcy, dstCcy]);
 
   // ─── Markdown sections ────────────────────────────────────────────────
-  const reportSections = useMemo(
-    () => (report ? parseMarkdownSections(report) : []),
-    [report],
-  );
+  const reportSections = useMemo(() => (report ? parseMarkdownSections(report) : []), [report]);
 
   const [activeSectionId, setActiveSectionId] = useState<string | null>(null);
 
@@ -1116,754 +1128,780 @@ export default function SafePath() {
   // ─── Render ───────────────────────────────────────────────────────────
   return (
     <PremiumGate>
-    <div className="relative min-h-[calc(100vh-3.5rem)] overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 50% -10%, rgba(14,165,233,0.18) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 80% 80%, rgba(2,132,199,0.10) 0%, transparent 60%)",
-        }}
-      />
-      <div className="max-w-7xl mx-auto px-6 py-10 pb-28">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="text-[10px] font-bold uppercase tracking-[0.3em] text-cyan-300/80 mb-1">
-            AI Agent — not a chatbot
+      <div className="relative min-h-[calc(100vh-3.5rem)] overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 py-10 pb-28">
+          {/* Header */}
+          <div className="mb-6">
+            <div className="font-mono text-[10px] font-bold uppercase tracking-[0.3em] text-[color:var(--page-accent-400)] mb-1">
+              AI Agent — not a chatbot
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Route any fiat through XRPL safely
+            </h1>
+            <p className="text-slate-400 text-sm max-w-3xl">
+              Pick two currencies and an amount. The AI agent calls six tools against the live XRPL:
+              resolves the corridor from the atlas, runs the{" "}
+              <a href="/analyze" className="text-xrp-400 hover:underline">
+                Entity Audit
+              </a>{" "}
+              crawler on every hop, queries the{" "}
+              <a href="/corridors" className="text-xrp-400 hover:underline">
+                Corridor Atlas
+              </a>{" "}
+              for actor intelligence, fetches live orderbook depth, proposes split routing for large
+              amounts, and generates a downloadable compliance report. Everything streams in real
+              time.
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">
-            Route any fiat through XRPL safely
-          </h1>
-          <p className="text-slate-400 text-sm max-w-3xl">
-            Pick two currencies and an amount. The AI agent calls six tools
-            against the live XRPL: resolves the corridor from the atlas,
-            runs the{" "}
-            <a href="/analyze" className="text-xrp-400 hover:underline">Entity Audit</a>{" "}
-            crawler on every hop, queries the{" "}
-            <a href="/corridors" className="text-xrp-400 hover:underline">Corridor Atlas</a>{" "}
-            for actor intelligence, fetches live orderbook depth, proposes
-            split routing for large amounts, and generates a downloadable
-            compliance report. Everything streams in real time.
-          </p>
-        </div>
 
-        {/* Input form */}
-        <Card className="mb-6" data-testid="safe-path-form">
-          <CardContent className="p-5">
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_1fr_auto_auto] gap-3 items-end">
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">
-                  From
-                </label>
-                <select
-                  value={srcCcy}
-                  onChange={(e) => setSrcCcy(e.target.value)}
+          {/* Input form */}
+          <Card className="mb-6" data-testid="safe-path-form">
+            <CardContent className="p-5">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr_1fr_auto_auto] gap-3 items-end">
+                <div>
+                  <label className="block text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">
+                    From
+                  </label>
+                  <select
+                    value={srcCcy}
+                    onChange={(e) => setSrcCcy(e.target.value)}
+                    disabled={running}
+                    className="w-full border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-500 focus:outline-none"
+                    data-testid="sp-from"
+                  >
+                    {currencies.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const t = srcCcy;
+                    setSrcCcy(dstCcy);
+                    setDstCcy(t);
+                  }}
                   disabled={running}
-                  className="w-full rounded border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-500 focus:outline-none"
-                  data-testid="sp-from"
+                  className="mb-1 border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 hover:border-xrp-500 hover:text-white"
                 >
-                  {currencies.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <button
-                type="button"
-                onClick={() => {
-                  const t = srcCcy;
-                  setSrcCcy(dstCcy);
-                  setDstCcy(t);
-                }}
-                disabled={running}
-                className="mb-1 rounded border border-slate-700 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 hover:border-xrp-500 hover:text-white"
-              >
-                &#8644;
-              </button>
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">
-                  To
-                </label>
-                <select
-                  value={dstCcy}
-                  onChange={(e) => setDstCcy(e.target.value)}
-                  disabled={running}
-                  className="w-full rounded border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-500 focus:outline-none"
-                  data-testid="sp-to"
-                >
-                  {currencies.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">
-                  Amount
-                </label>
-                <input
-                  type="text"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !running && run()}
-                  disabled={running}
-                  className="w-full rounded border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-500 focus:outline-none"
-                  data-testid="sp-amount"
-                />
-              </div>
-              <div>
-                <label className="block text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">
-                  Max risk
-                </label>
-                <select
-                  value={tolerance}
-                  onChange={(e) =>
-                    setTolerance(e.target.value as RiskSeverity)
-                  }
-                  disabled={running}
-                  className="w-full rounded border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm text-white focus:border-xrp-500 focus:outline-none"
-                >
-                  <option value="LOW">LOW</option>
-                  <option value="MED">MED</option>
-                  <option value="HIGH">HIGH</option>
-                </select>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={run}
-                  disabled={running}
-                  data-testid="sp-run"
-                >
-                  {running ? "Running..." : "Analyze route"}
-                </Button>
-                {running && (
-                  <Button onClick={stop} variant="ghost">
-                    Stop
+                  &#8644;
+                </button>
+                <div>
+                  <label className="block text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">
+                    To
+                  </label>
+                  <select
+                    value={dstCcy}
+                    onChange={(e) => setDstCcy(e.target.value)}
+                    disabled={running}
+                    className="w-full border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-500 focus:outline-none"
+                    data-testid="sp-to"
+                  >
+                    {currencies.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">
+                    Amount
+                  </label>
+                  <input
+                    type="text"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !running && run()}
+                    disabled={running}
+                    className="w-full border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm font-mono text-white focus:border-xrp-500 focus:outline-none"
+                    data-testid="sp-amount"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-1">
+                    Max risk
+                  </label>
+                  <select
+                    value={tolerance}
+                    onChange={(e) => setTolerance(e.target.value as RiskSeverity)}
+                    disabled={running}
+                    className="w-full border border-slate-700 bg-slate-950/50 px-3 py-2 text-sm text-white focus:border-xrp-500 focus:outline-none"
+                  >
+                    <option value="LOW">LOW</option>
+                    <option value="MED">MED</option>
+                    <option value="HIGH">HIGH</option>
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <Button onClick={run} disabled={running} data-testid="sp-run">
+                    {running ? "Running..." : "Analyze route"}
                   </Button>
-                )}
+                  {running && (
+                    <Button onClick={stop} variant="ghost">
+                      Stop
+                    </Button>
+                  )}
+                </div>
               </div>
-            </div>
-            {error && (
-              <div className="mt-3 text-xs text-red-400 font-mono">
-                {error}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              {error && <div className="mt-3 text-xs text-red-400 font-mono">{error}</div>}
+            </CardContent>
+          </Card>
 
-        {/* ── Corridor Banner (appears during analysis) ────────────────── */}
-        {liveCorridor && (
-          <div
-            className="mb-4 sticky top-0 z-20 bg-slate-900/95 backdrop-blur border border-slate-700 rounded-lg px-5 py-3 flex items-center justify-between gap-4 flex-wrap"
-            data-testid="sp-corridor-banner"
-          >
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-lg font-bold text-white">
-                {liveCorridor.source.flag} {liveCorridor.source.symbol}
-                <span className="text-slate-500 mx-2">&#8594;</span>
-                {liveCorridor.dest.flag} {liveCorridor.dest.symbol}
-              </span>
-              <Badge variant={categoryBadgeVariant(liveCorridor.category)}>
-                {categoryLabel(liveCorridor.category)}
-              </Badge>
-              <Badge variant="default">
-                Bridge: {liveCorridor.bridgeAsset ?? "RLUSD"}
-              </Badge>
-              <span className="text-[10px] text-slate-400 font-mono">
-                {liveCorridor.sourceActors?.length ?? 0} src actors
-                {" / "}
-                {liveCorridor.destActors?.length ?? 0} dst actors
-              </span>
-            </div>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={() =>
-                navigate(`/corridors/${liveCorridor.id}`)
-              }
+          {/* ── Corridor Banner (appears during analysis) ────────────────── */}
+          {liveCorridor && (
+            <div
+              className="mb-4 sticky top-0 z-20 bg-slate-900/95 border border-slate-700 px-5 py-3 flex items-center justify-between gap-4 flex-wrap"
+              data-testid="sp-corridor-banner"
             >
-              View corridor &#8594;
-            </Button>
-          </div>
-        )}
-
-        {/* ── Live Analysis Preview Cards ──────────────────────────────── */}
-        {analyses.length > 0 && (
-          <div className="mb-4">
-            <div className="text-[10px] font-bold uppercase tracking-widest text-sky-400 mb-2">
-              Deep analyses ({analyses.length})
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-lg font-bold text-white">
+                  {liveCorridor.source.flag} {liveCorridor.source.symbol}
+                  <span className="text-slate-500 mx-2">&#8594;</span>
+                  {liveCorridor.dest.flag} {liveCorridor.dest.symbol}
+                </span>
+                <Badge variant={categoryBadgeVariant(liveCorridor.category)}>
+                  {categoryLabel(liveCorridor.category)}
+                </Badge>
+                <Badge variant="default">Bridge: {liveCorridor.bridgeAsset ?? "RLUSD"}</Badge>
+                <span className="text-[10px] text-slate-400 font-mono">
+                  {liveCorridor.sourceActors?.length ?? 0} src actors
+                  {" / "}
+                  {liveCorridor.destActors?.length ?? 0} dst actors
+                </span>
+              </div>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => navigate(`/corridors/${liveCorridor.id}`)}
+              >
+                View corridor &#8594;
+              </Button>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {analyses.map((a) => (
-                <div
-                  key={a.id}
-                  className="shrink-0 w-[300px] bg-slate-900 border border-slate-700 rounded-lg p-3"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-semibold text-white truncate">
-                      {a.label}
-                    </span>
-                    {a.status === "running" ? (
-                      <span className="inline-block w-2 h-2 bg-sky-400 rounded-full animate-pulse" />
-                    ) : (
-                      <Badge variant="info">done</Badge>
+          )}
+
+          {/* ── Live Analysis Preview Cards ──────────────────────────────── */}
+          {analyses.length > 0 && (
+            <div className="mb-4">
+              <div className="text-[10px] font-bold uppercase tracking-widest text-sky-400 mb-2">
+                Deep analyses ({analyses.length})
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {analyses.map((a) => (
+                  <div key={a.id} className="shrink-0 w-[300px] app-glass-surface p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-semibold text-white truncate">{a.label}</span>
+                      {a.status === "running" ? (
+                        <span className="inline-block w-2 h-2 bg-sky-400 animate-pulse" />
+                      ) : (
+                        <Badge variant="info">done</Badge>
+                      )}
+                    </div>
+                    <div className="text-[10px] text-slate-500 font-mono mb-2">
+                      {a.address.slice(0, 12)}...
+                    </div>
+                    {a.status === "running" && (
+                      <div className="text-xs text-sky-300 animate-pulse">analyzing...</div>
+                    )}
+                    {a.status === "done" && (
+                      <>
+                        <div className="text-[10px] text-slate-400 mb-2">
+                          {a.nodeCount} nodes, {a.edgeCount} edges
+                        </div>
+                        <div
+                          className="w-full h-[80px] overflow-hidden border border-slate-800 bg-slate-950 mb-2"
+                          style={{ position: "relative" }}
+                        >
+                          <iframe
+                            src={`/graph/${a.id}`}
+                            title={`Preview ${a.label}`}
+                            className="border-0"
+                            style={{
+                              width: 750,
+                              height: 500,
+                              transform: "scale(0.4)",
+                              transformOrigin: "top left",
+                              pointerEvents: "none",
+                            }}
+                          />
+                        </div>
+                        <a
+                          href={`/graph/${a.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center w-full border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+                        >
+                          View full graph &rarr;
+                        </a>
+                      </>
                     )}
                   </div>
-                  <div className="text-[10px] text-slate-500 font-mono mb-2">
-                    {a.address.slice(0, 12)}...
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── Main content: SSE stream (left) + Live graph (right) ───── */}
+          {(events.length > 0 || running) && (
+            <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 mb-6">
+              {/* Agent reasoning stream */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    Agent reasoning
+                    {running && <span className="inline-block w-2 h-2 bg-xrp-400 animate-pulse" />}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div
+                    ref={streamRef}
+                    data-testid="safe-path-stream"
+                    className="bg-slate-950/80 border border-slate-800 p-3 h-[560px] overflow-y-auto font-mono text-[11px] leading-relaxed space-y-1"
+                  >
+                    {events.map((e, i) => (
+                      <EventRow key={i} event={e} />
+                    ))}
+                    {running && events.length === 0 && (
+                      <div className="text-slate-600">Connecting to XRPL...</div>
+                    )}
                   </div>
-                  {a.status === "running" && (
-                    <div className="text-xs text-sky-300 animate-pulse">
-                      analyzing...
-                    </div>
-                  )}
-                  {a.status === "done" && (
-                    <>
-                      <div className="text-[10px] text-slate-400 mb-2">
-                        {a.nodeCount} nodes, {a.edgeCount} edges
-                      </div>
-                      <div
-                        className="w-full h-[80px] overflow-hidden rounded border border-slate-800 bg-slate-950 mb-2"
-                        style={{ position: "relative" }}
+                </CardContent>
+              </Card>
+
+              {/* Live corridor discovery graph */}
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    Live corridor map
+                    <span className="text-[10px] font-mono text-slate-500">
+                      {rfNodes.length} nodes, {rfEdges.length} edges
+                    </span>
+                    {running && (
+                      <span className="inline-block w-2 h-2 bg-emerald-400 animate-pulse" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  {rfNodes.length > 0 ? (
+                    <div className="relative h-[600px] border border-slate-800 bg-slate-950/50 overflow-hidden">
+                      <ReactFlow
+                        nodes={rfNodes}
+                        edges={rfEdges}
+                        onNodesChange={onRfNodesChange}
+                        onEdgesChange={onRfEdgesChange}
+                        onNodeClick={(_e, node) => setInspectedNode(node)}
+                        onPaneClick={() => setInspectedNode(null)}
+                        fitView
+                        fitViewOptions={{ padding: 0.12 }}
+                        proOptions={{ hideAttribution: true }}
+                        minZoom={0.15}
+                        maxZoom={3}
+                        nodesDraggable
                       >
-                        <iframe
-                          src={`/graph/${a.id}`}
-                          title={`Preview ${a.label}`}
-                          className="border-0"
+                        <Background
+                          variant={BackgroundVariant.Dots}
+                          gap={16}
+                          size={0.5}
+                          color="#262C42"
+                        />
+                        <Controls
+                          showInteractive={false}
+                          position="top-right"
                           style={{
-                            width: 750,
-                            height: 500,
-                            transform: "scale(0.4)",
-                            transformOrigin: "top left",
-                            pointerEvents: "none",
+                            background: "#070B14",
+                            border: "1px solid #262C42",
+                            borderRadius: 0,
                           }}
                         />
+                        <MiniMap
+                          nodeColor={(n) => {
+                            if (n.id.startsWith("fiat:")) return "#0ea5e9";
+                            if (n.id.startsWith("bridge:")) return "#10b981";
+                            if (n.style?.border?.toString().includes("#38bdf8")) return "#38bdf8";
+                            if (n.style?.border?.toString().includes("#34d399")) return "#34d399";
+                            if (n.style?.border?.toString().includes("#ef4444")) return "#ef4444";
+                            return "#3E465E";
+                          }}
+                          style={{ background: "#020409", border: "1px solid #12172A" }}
+                          maskColor="rgba(0,0,0,0.7)"
+                          position="bottom-left"
+                        />
+                      </ReactFlow>
+                      {/* Node inspect panel — slides in from the right on click */}
+                      {inspectedNode && (
+                        <div
+                          className="absolute top-0 right-0 w-[280px] h-full bg-slate-950/95 border-l border-slate-800 z-20 overflow-y-auto"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="p-3 border-b border-slate-800 flex items-start justify-between">
+                            <div>
+                              <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500">
+                                {inspectedNode.id.split(":")[0]}
+                              </div>
+                              <div className="text-sm font-semibold text-white mt-0.5">
+                                {typeof inspectedNode.data?.label === "string"
+                                  ? inspectedNode.data.label
+                                  : inspectedNode.id}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setInspectedNode(null)}
+                              className="text-slate-500 hover:text-white text-xs px-1"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                          <div className="p-3 space-y-3 text-[11px]">
+                            {/* Node ID */}
+                            <div>
+                              <div className="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">
+                                ID
+                              </div>
+                              <div className="text-slate-300 font-mono text-[10px] break-all">
+                                {inspectedNode.id}
+                              </div>
+                            </div>
+                            {/* Position */}
+                            <div>
+                              <div className="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">
+                                Position
+                              </div>
+                              <div className="text-slate-400 font-mono">
+                                x:{Math.round(inspectedNode.position.x)} y:
+                                {Math.round(inspectedNode.position.y)}
+                              </div>
+                            </div>
+                            {/* Type info based on ID prefix */}
+                            {inspectedNode.id.startsWith("fiat:") && (
+                              <div className="border border-sky-500/30 bg-sky-500/10 p-2">
+                                <div className="text-sky-300 font-semibold">
+                                  Fiat currency endpoint
+                                </div>
+                                <div className="text-slate-400 mt-1">
+                                  This is the source or destination fiat currency. Real money
+                                  enters/exits the XRPL corridor here through off-chain partners.
+                                </div>
+                              </div>
+                            )}
+                            {inspectedNode.id.startsWith("bridge:") && (
+                              <div className="border border-emerald-500/30 bg-emerald-500/10 p-2">
+                                <div className="text-emerald-300 font-semibold">
+                                  XRPL bridge asset
+                                </div>
+                                <div className="text-slate-400 mt-1">
+                                  The asset that crosses the XRPL ledger. All fiat flows convert to
+                                  this asset on one side and convert back on the other.
+                                </div>
+                                {inspectedNode.data?.label?.toString().includes("bps") && (
+                                  <div className="text-emerald-200 mt-1 font-mono">
+                                    Live spread measured from partner orderbook.
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                            {inspectedNode.id.startsWith("actor:") && (
+                              <div className="border border-slate-700 bg-slate-900/50 p-2">
+                                <div className="text-white font-semibold">Off-chain actor</div>
+                                <div className="text-slate-400 mt-1">
+                                  A CEX, ODL partner, bank, or fintech that handles the fiat↔XRPL
+                                  conversion. Click "View corridor →" in the banner above to see the
+                                  full actor registry.
+                                </div>
+                                {inspectedNode.style?.border?.toString().includes("#38bdf8") && (
+                                  <Badge variant="info" className="mt-1 text-[9px]">
+                                    ODL Partner
+                                  </Badge>
+                                )}
+                                {inspectedNode.style?.border?.toString().includes("#34d399") && (
+                                  <Badge
+                                    variant="low"
+                                    className="mt-1 text-[9px] bg-emerald-500/15 text-emerald-300 border-emerald-500/40"
+                                  >
+                                    RLUSD
+                                  </Badge>
+                                )}
+                              </div>
+                            )}
+                            {(inspectedNode.id.startsWith("crawled:") ||
+                              inspectedNode.id.startsWith("account:")) && (
+                              <div className="border border-amber-500/30 bg-amber-500/10 p-2">
+                                <div className="text-amber-300 font-semibold">
+                                  {inspectedNode.data?.name || "Crawled XRPL account"}
+                                </div>
+                                {inspectedNode.data?.address && (
+                                  <div className="font-mono text-[9px] text-slate-500 mt-0.5 break-all">
+                                    {inspectedNode.data.address}
+                                  </div>
+                                )}
+                                {inspectedNode.data?.reason && (
+                                  <div className="text-[10px] text-slate-400 mt-1">
+                                    <span className="text-slate-500">Why crawled: </span>
+                                    {inspectedNode.data.reason}
+                                  </div>
+                                )}
+                                <div className="text-slate-400 mt-1 text-[10px]">
+                                  Inspected on live XRPL mainnet via XRPScan + account_info. Checked
+                                  for global freeze, clawback, deposit auth, domain verification,
+                                  and key management.
+                                </div>
+                              </div>
+                            )}
+                            {inspectedNode.id.startsWith("satellite:") && (
+                              <div className="border border-sky-500/30 bg-sky-500/10 p-2">
+                                <div className="text-sky-300 font-semibold">
+                                  Deep analysis result
+                                </div>
+                                <div className="text-slate-400 mt-1">
+                                  A depth-2 BFS crawl was run on this entity, discovering the
+                                  node/edge counts shown. Click "View full graph" in the analysis
+                                  cards above to explore.
+                                </div>
+                              </div>
+                            )}
+                            {/* Connected edges */}
+                            <div>
+                              <div className="text-[9px] uppercase tracking-wider text-slate-500 mb-1">
+                                Connections
+                              </div>
+                              <div className="text-slate-400">
+                                {
+                                  rfEdges.filter(
+                                    (e) =>
+                                      e.source === inspectedNode.id ||
+                                      e.target === inspectedNode.id,
+                                  ).length
+                                }{" "}
+                                edge(s)
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {/* Legend */}
+                      <div className="pointer-events-none absolute bottom-0 left-0 right-0 border-t border-slate-800/80 bg-black/75 px-4 py-2">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-slate-400">
+                          <span className="font-bold uppercase tracking-widest text-slate-500 mr-1">
+                            Nodes
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 bg-[#0c4a6e] border border-[#0ea5e9]" />
+                            fiat
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 bg-[#064e3b] border border-[#10b981]" />
+                            bridge
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 bg-[#0c4a6e] border border-[#38bdf8]" />
+                            ODL actor
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 bg-[#064e3b] border border-[#34d399]" />
+                            RLUSD actor
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 bg-[#12172A] border border-[#3E465E]" />
+                            other actor
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 bg-emerald-500/30 border border-emerald-500" />
+                            crawled ✓
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 bg-red-500/30 border border-red-500" />
+                            risk flagged
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block w-2.5 h-2.5 bg-sky-500/20 border border-sky-500" />
+                            analysis satellite
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-slate-400 mt-1">
+                          <span className="font-bold uppercase tracking-widest text-slate-500 mr-1">
+                            Edges
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block h-[2px] w-4 bg-[#38bdf8]" />
+                            ODL
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block h-[2px] w-4 bg-[#34d399]" />
+                            RLUSD
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block h-[2px] w-4 bg-[#3E465E]" />
+                            standard
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block h-[2px] w-4 bg-[#fbbf24]" />
+                            recommended path
+                          </span>
+                          <span className="ml-auto font-mono text-slate-500">
+                            {rfNodes.length}n · {rfEdges.length}e
+                          </span>
+                        </div>
                       </div>
-                      <a
-                        href={`/graph/${a.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center w-full rounded-md border border-slate-700 bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
-                      >
-                        View full graph &rarr;
-                      </a>
-                    </>
+                    </div>
+                  ) : (
+                    <div className="h-[600px] flex items-center justify-center text-slate-500 text-sm border border-slate-800 bg-slate-950/50">
+                      {running ? (
+                        <>
+                          <span className="inline-block w-4 h-4 border-2 border-slate-600 border-t-slate-300 rounded-full animate-spin mr-2" />
+                          Agent is working...
+                        </>
+                      ) : (
+                        "Run the agent to see the live corridor map"
+                      )}
+                    </div>
                   )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* ── Result card ─────────────────────────────────────────────── */}
+          {result && (
+            <Card className="mb-4" data-testid="safe-path-result">
+              <CardHeader className="flex flex-row items-start justify-between gap-4">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">
+                    Final verdict
+                  </div>
+                  <CardTitle className="text-lg">
+                    {result.verdict === "SAFE" && "Safe on-chain path selected"}
+                    {result.verdict === "OFF_CHAIN_ROUTED" && "Off-chain route via RLUSD confirmed"}
+                    {result.verdict === "REJECTED" && "All paths rejected"}
+                    {result.verdict === "NO_PATHS" && "No paths found"}
+                  </CardTitle>
+                </div>
+                <div className="flex gap-2 flex-wrap">
+                  <VerdictBadge verdict={result.verdict} />
+                  {result.corridor && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => navigate(`/corridors/${result.corridor!.id}`)}
+                      data-testid="sp-view-corridor"
+                    >
+                      View corridor
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-slate-950/60 border border-slate-800 p-4">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                    Compliance justification
+                  </div>
+                  <p className="text-sm text-slate-200 leading-relaxed italic">
+                    {result.reasoning}
+                  </p>
+                </div>
+
+                {/* Analysis links */}
+                {result.analysisIds && result.analysisIds.length > 0 && (
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                      Deep analyses ({result.analysisIds.length})
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {analysesSummary.map((a) => (
+                        <Button
+                          key={a.id}
+                          variant="secondary"
+                          className="text-xs"
+                          onClick={() => navigate(`/graph/${a.id}`)}
+                        >
+                          View analysis: {a.label} ({a.nodeCount}n, {a.edgeCount}e)
+                        </Button>
+                      ))}
+                      {analysesSummary.length === 0 &&
+                        result.analysisIds.map((id) => (
+                          <Button
+                            key={id}
+                            variant="secondary"
+                            className="text-xs"
+                            onClick={() => navigate(`/graph/${id}`)}
+                          >
+                            View analysis: {id.slice(0, 8)}...
+                          </Button>
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Corridor RAG answer */}
+                {result.corridorRagAnswer && (
+                  <div className="bg-cyan-500/5 border border-cyan-500/30 p-3">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-1">
+                      Corridor intelligence (RAG)
+                    </div>
+                    <p className="text-xs text-slate-300 whitespace-pre-wrap">
+                      {result.corridorRagAnswer}
+                    </p>
+                  </div>
+                )}
+
+                {/* Split plan */}
+                {result.splitPlan && result.splitPlan.length > 0 && (
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                      Recommended split plan
+                    </div>
+                    <div className="space-y-2">
+                      {result.splitPlan.map((leg, i) => (
+                        <div key={i} className="bg-cyan-500/5 border border-cyan-500/20 p-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-cyan-300">
+                              {leg.percentage}%
+                            </span>
+                            <span className="text-xs text-slate-300">{leg.description}</span>
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-1">{leg.reason}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Winning path */}
+                {result.winningPath && (
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                      Winning path #{result.winningPath.index} -- {result.winningPath.hops.length}{" "}
+                      hop(s), risk {result.winningPath.riskScore}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {result.winningPath.hops.map((hop, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          {i > 0 && <span className="text-slate-600">-&gt;</span>}
+                          <div className="px-2 py-1 bg-slate-900 border border-slate-700 text-[10px]">
+                            <div className="text-slate-400">{hop.type}</div>
+                            <div className="text-white font-mono">
+                              {hop.currency ?? "XRP"}
+                              {hop.account ? ` / ${hop.account.slice(0, 6)}...` : ""}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Rejected */}
+                {result.rejected.length > 0 && (
+                  <div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
+                      Rejected alternatives ({result.rejected.length})
+                    </div>
+                    <div className="space-y-2">
+                      {result.rejected.map((r) => (
+                        <div
+                          key={r.pathIndex}
+                          className="bg-red-500/5 border border-red-500/30 p-2 text-xs"
+                        >
+                          <div className="text-red-300">{r.reason}</div>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {r.flags.map((f) => (
+                              <span
+                                key={f}
+                                className="px-1.5 py-0.5 text-[9px] font-mono bg-red-500/15 text-red-400 border border-red-500/30"
+                              >
+                                {f}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* ── Styled Compliance Report ──────────────────────────────── */}
+          {report && (
+            <div className="mb-4 max-w-[900px] mx-auto" data-testid="sp-full-report">
+              {/* Report header card */}
+              <div className="app-glass-surface px-8 py-6 mb-5">
+                <div className="flex justify-between items-start flex-wrap gap-3">
+                  <div>
+                    <div className="text-[9px] font-bold tracking-[2px] uppercase text-xrp-500 mb-1">
+                      CorLens Safe Path Compliance Report
+                    </div>
+                    <h2 className="text-xl font-bold text-white">
+                      {srcCcy} &rarr; {dstCcy} &middot; {amount} {srcCcy}
+                    </h2>
+                  </div>
+                  <Button
+                    onClick={downloadReport}
+                    variant="secondary"
+                    size="sm"
+                    data-testid="sp-download"
+                  >
+                    Download .md
+                  </Button>
+                </div>
+
+                {result && (
+                  <div
+                    className="mt-4 border-l-[3px] px-4 py-3 text-[13px] leading-relaxed text-slate-400"
+                    style={{
+                      background: "#020409",
+                      borderLeftColor:
+                        result.verdict === "SAFE" || result.verdict === "OFF_CHAIN_ROUTED"
+                          ? "#22c55e"
+                          : result.verdict === "REJECTED"
+                            ? "#ef4444"
+                            : "#f59e0b",
+                    }}
+                  >
+                    {result.reasoning}
+                  </div>
+                )}
+              </div>
+
+              {/* Section navigation */}
+              {reportSections.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto mb-5 pb-1 sticky top-14 z-10 bg-slate-950/95 py-2 px-1 -mx-1">
+                  {reportSections.map((s) => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => scrollToSection(s.id)}
+                      className={`shrink-0 px-3 py-1.5 text-[10px] font-semibold border transition-colors ${
+                        activeSectionId === s.id
+                          ? "bg-xrp-500/20 text-xrp-300 border-xrp-500/40"
+                          : "bg-slate-800/50 text-slate-400 border-slate-700 hover:text-white hover:border-slate-500"
+                      }`}
+                    >
+                      {s.title}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Report sections */}
+              {reportSections.map((section) => (
+                <div
+                  key={section.id}
+                  id={`report-section-${section.id}`}
+                  className="app-glass-surface px-8 py-5 mb-5"
+                >
+                  <h3 className="text-[11px] font-bold tracking-[2px] uppercase text-slate-500 mb-3 pb-2 border-b border-slate-800">
+                    {section.title}
+                  </h3>
+                  <div className="space-y-1">
+                    {section.lines.map((line, idx) => renderMdLine(line, idx))}
+                  </div>
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* ── Main content: SSE stream (left) + Live graph (right) ───── */}
-        {(events.length > 0 || running) && (
-          <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 mb-6">
-            {/* Agent reasoning stream */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  Agent reasoning
-                  {running && (
-                    <span className="inline-block w-2 h-2 bg-xrp-400 rounded-full animate-pulse" />
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div
-                  ref={streamRef}
-                  data-testid="safe-path-stream"
-                  className="bg-slate-950/80 border border-slate-800 rounded p-3 h-[560px] overflow-y-auto font-mono text-[11px] leading-relaxed space-y-1"
-                >
-                  {events.map((e, i) => (
-                    <EventRow key={i} event={e} />
-                  ))}
-                  {running && events.length === 0 && (
-                    <div className="text-slate-600">
-                      Connecting to XRPL...
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Live corridor discovery graph */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  Live corridor map
-                  <span className="text-[10px] font-mono text-slate-500">
-                    {rfNodes.length} nodes, {rfEdges.length} edges
-                  </span>
-                  {running && (
-                    <span className="inline-block w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                {rfNodes.length > 0 ? (
-                  <div className="relative h-[600px] border border-slate-800 rounded bg-slate-950/50 overflow-hidden">
-                    <ReactFlow
-                      nodes={rfNodes}
-                      edges={rfEdges}
-                      onNodesChange={onRfNodesChange}
-                      onEdgesChange={onRfEdgesChange}
-                      onNodeClick={(_e, node) => setInspectedNode(node)}
-                      onPaneClick={() => setInspectedNode(null)}
-                      fitView
-                      fitViewOptions={{ padding: 0.12 }}
-                      proOptions={{ hideAttribution: true }}
-                      minZoom={0.15}
-                      maxZoom={3}
-                      nodesDraggable
-                    >
-                      <Background
-                        variant={BackgroundVariant.Dots}
-                        gap={16}
-                        size={0.5}
-                        color="#334155"
-                      />
-                      <Controls
-                        showInteractive={false}
-                        position="top-right"
-                        style={{ background: "#0f172a", border: "1px solid #334155", borderRadius: 6 }}
-                      />
-                      <MiniMap
-                        nodeColor={(n) => {
-                          if (n.id.startsWith("fiat:")) return "#0ea5e9";
-                          if (n.id.startsWith("bridge:")) return "#10b981";
-                          if (n.style?.border?.toString().includes("#38bdf8")) return "#38bdf8";
-                          if (n.style?.border?.toString().includes("#34d399")) return "#34d399";
-                          if (n.style?.border?.toString().includes("#ef4444")) return "#ef4444";
-                          return "#475569";
-                        }}
-                        style={{ background: "#020617", border: "1px solid #1e293b" }}
-                        maskColor="rgba(0,0,0,0.7)"
-                        position="bottom-left"
-                      />
-                    </ReactFlow>
-                    {/* Node inspect panel — slides in from the right on click */}
-                    {inspectedNode && (
-                      <div
-                        className="absolute top-0 right-0 w-[280px] h-full bg-slate-950/95 border-l border-slate-800 backdrop-blur-md z-20 overflow-y-auto"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <div className="p-3 border-b border-slate-800 flex items-start justify-between">
-                          <div>
-                            <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500">
-                              {inspectedNode.id.split(":")[0]}
-                            </div>
-                            <div className="text-sm font-semibold text-white mt-0.5">
-                              {typeof inspectedNode.data?.label === "string"
-                                ? inspectedNode.data.label
-                                : inspectedNode.id}
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => setInspectedNode(null)}
-                            className="text-slate-500 hover:text-white text-xs px-1"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                        <div className="p-3 space-y-3 text-[11px]">
-                          {/* Node ID */}
-                          <div>
-                            <div className="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">ID</div>
-                            <div className="text-slate-300 font-mono text-[10px] break-all">{inspectedNode.id}</div>
-                          </div>
-                          {/* Position */}
-                          <div>
-                            <div className="text-[9px] uppercase tracking-wider text-slate-500 mb-0.5">Position</div>
-                            <div className="text-slate-400 font-mono">
-                              x:{Math.round(inspectedNode.position.x)} y:{Math.round(inspectedNode.position.y)}
-                            </div>
-                          </div>
-                          {/* Type info based on ID prefix */}
-                          {inspectedNode.id.startsWith("fiat:") && (
-                            <div className="rounded border border-sky-500/30 bg-sky-500/10 p-2">
-                              <div className="text-sky-300 font-semibold">Fiat currency endpoint</div>
-                              <div className="text-slate-400 mt-1">
-                                This is the source or destination fiat currency. Real money enters/exits the XRPL corridor here through off-chain partners.
-                              </div>
-                            </div>
-                          )}
-                          {inspectedNode.id.startsWith("bridge:") && (
-                            <div className="rounded border border-emerald-500/30 bg-emerald-500/10 p-2">
-                              <div className="text-emerald-300 font-semibold">XRPL bridge asset</div>
-                              <div className="text-slate-400 mt-1">
-                                The asset that crosses the XRPL ledger. All fiat flows convert to this asset on one side and convert back on the other.
-                              </div>
-                              {inspectedNode.data?.label?.toString().includes("bps") && (
-                                <div className="text-emerald-200 mt-1 font-mono">
-                                  Live spread measured from partner orderbook.
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          {inspectedNode.id.startsWith("actor:") && (
-                            <div className="rounded border border-slate-700 bg-slate-900/50 p-2">
-                              <div className="text-white font-semibold">Off-chain actor</div>
-                              <div className="text-slate-400 mt-1">
-                                A CEX, ODL partner, bank, or fintech that handles the fiat↔XRPL conversion. Click "View corridor →" in the banner above to see the full actor registry.
-                              </div>
-                              {inspectedNode.style?.border?.toString().includes("#38bdf8") && (
-                                <Badge variant="info" className="mt-1 text-[9px]">ODL Partner</Badge>
-                              )}
-                              {inspectedNode.style?.border?.toString().includes("#34d399") && (
-                                <Badge variant="low" className="mt-1 text-[9px] bg-emerald-500/15 text-emerald-300 border-emerald-500/40">RLUSD</Badge>
-                              )}
-                            </div>
-                          )}
-                          {(inspectedNode.id.startsWith("crawled:") || inspectedNode.id.startsWith("account:")) && (
-                            <div className="rounded border border-amber-500/30 bg-amber-500/10 p-2">
-                              <div className="text-amber-300 font-semibold">
-                                {inspectedNode.data?.name || "Crawled XRPL account"}
-                              </div>
-                              {inspectedNode.data?.address && (
-                                <div className="font-mono text-[9px] text-slate-500 mt-0.5 break-all">
-                                  {inspectedNode.data.address}
-                                </div>
-                              )}
-                              {inspectedNode.data?.reason && (
-                                <div className="text-[10px] text-slate-400 mt-1">
-                                  <span className="text-slate-500">Why crawled: </span>{inspectedNode.data.reason}
-                                </div>
-                              )}
-                              <div className="text-slate-400 mt-1 text-[10px]">
-                                Inspected on live XRPL mainnet via XRPScan + account_info. Checked for global freeze, clawback, deposit auth, domain verification, and key management.
-                              </div>
-                            </div>
-                          )}
-                          {inspectedNode.id.startsWith("satellite:") && (
-                            <div className="rounded border border-sky-500/30 bg-sky-500/10 p-2">
-                              <div className="text-sky-300 font-semibold">Deep analysis result</div>
-                              <div className="text-slate-400 mt-1">
-                                A depth-2 BFS crawl was run on this entity, discovering the node/edge counts shown. Click "View full graph" in the analysis cards above to explore.
-                              </div>
-                            </div>
-                          )}
-                          {/* Connected edges */}
-                          <div>
-                            <div className="text-[9px] uppercase tracking-wider text-slate-500 mb-1">Connections</div>
-                            <div className="text-slate-400">
-                              {rfEdges.filter(
-                                (e) => e.source === inspectedNode.id || e.target === inspectedNode.id,
-                              ).length}{" "}
-                              edge(s)
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    {/* Legend */}
-                    <div className="pointer-events-none absolute bottom-0 left-0 right-0 border-t border-slate-800/80 bg-black/60 backdrop-blur-md px-4 py-2">
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-slate-400">
-                        <span className="font-bold uppercase tracking-widest text-slate-500 mr-1">Nodes</span>
-                        <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#0c4a6e] border border-[#0ea5e9]" />fiat</span>
-                        <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#064e3b] border border-[#10b981]" />bridge</span>
-                        <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#0c4a6e] border border-[#38bdf8]" />ODL actor</span>
-                        <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#064e3b] border border-[#34d399]" />RLUSD actor</span>
-                        <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-[#1e293b] border border-[#475569]" />other actor</span>
-                        <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500/30 border border-emerald-500" />crawled ✓</span>
-                        <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500/30 border border-red-500" />risk flagged</span>
-                        <span className="flex items-center gap-1"><span className="inline-block w-2.5 h-2.5 rounded-sm bg-sky-500/20 border border-sky-500" />analysis satellite</span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[9px] text-slate-400 mt-1">
-                        <span className="font-bold uppercase tracking-widest text-slate-500 mr-1">Edges</span>
-                        <span className="flex items-center gap-1"><span className="inline-block h-[2px] w-4 bg-[#38bdf8]" />ODL</span>
-                        <span className="flex items-center gap-1"><span className="inline-block h-[2px] w-4 bg-[#34d399]" />RLUSD</span>
-                        <span className="flex items-center gap-1"><span className="inline-block h-[2px] w-4 bg-[#475569]" />standard</span>
-                        <span className="flex items-center gap-1"><span className="inline-block h-[2px] w-4 bg-[#fbbf24]" />recommended path</span>
-                        <span className="ml-auto font-mono text-slate-500">{rfNodes.length}n · {rfEdges.length}e</span>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-[600px] flex items-center justify-center text-slate-500 text-sm border border-slate-800 rounded bg-slate-950/50">
-                    {running ? (
-                      <>
-                        <span className="inline-block w-4 h-4 border-2 border-slate-600 border-t-slate-300 rounded-full animate-spin mr-2" />
-                        Agent is working...
-                      </>
-                    ) : (
-                      "Run the agent to see the live corridor map"
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
-        {/* ── Result card ─────────────────────────────────────────────── */}
-        {result && (
-          <Card className="mb-4" data-testid="safe-path-result">
-            <CardHeader className="flex flex-row items-start justify-between gap-4">
-              <div>
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">
-                  Final verdict
-                </div>
-                <CardTitle className="text-lg">
-                  {result.verdict === "SAFE" &&
-                    "Safe on-chain path selected"}
-                  {result.verdict === "OFF_CHAIN_ROUTED" &&
-                    "Off-chain route via RLUSD confirmed"}
-                  {result.verdict === "REJECTED" &&
-                    "All paths rejected"}
-                  {result.verdict === "NO_PATHS" && "No paths found"}
-                </CardTitle>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                <VerdictBadge verdict={result.verdict} />
-                {result.corridor && (
-                  <Button
-                    variant="secondary"
-                    onClick={() =>
-                      navigate(`/corridors/${result.corridor!.id}`)
-                    }
-                    data-testid="sp-view-corridor"
-                  >
-                    View corridor
-                  </Button>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-slate-950/60 border border-slate-800 rounded p-4">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
-                  Compliance justification
-                </div>
-                <p className="text-sm text-slate-200 leading-relaxed italic">
-                  {result.reasoning}
-                </p>
-              </div>
-
-              {/* Analysis links */}
-              {result.analysisIds && result.analysisIds.length > 0 && (
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
-                    Deep analyses ({result.analysisIds.length})
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {analysesSummary.map((a) => (
-                      <Button
-                        key={a.id}
-                        variant="secondary"
-                        className="text-xs"
-                        onClick={() => navigate(`/graph/${a.id}`)}
-                      >
-                        View analysis: {a.label} ({a.nodeCount}n,{" "}
-                        {a.edgeCount}e)
-                      </Button>
-                    ))}
-                    {analysesSummary.length === 0 &&
-                      result.analysisIds.map((id) => (
-                        <Button
-                          key={id}
-                          variant="secondary"
-                          className="text-xs"
-                          onClick={() => navigate(`/graph/${id}`)}
-                        >
-                          View analysis: {id.slice(0, 8)}...
-                        </Button>
-                      ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Corridor RAG answer */}
-              {result.corridorRagAnswer && (
-                <div className="bg-cyan-500/5 border border-cyan-500/30 rounded p-3">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-cyan-400 mb-1">
-                    Corridor intelligence (RAG)
-                  </div>
-                  <p className="text-xs text-slate-300 whitespace-pre-wrap">
-                    {result.corridorRagAnswer}
-                  </p>
-                </div>
-              )}
-
-              {/* Split plan */}
-              {result.splitPlan && result.splitPlan.length > 0 && (
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
-                    Recommended split plan
-                  </div>
-                  <div className="space-y-2">
-                    {result.splitPlan.map((leg, i) => (
-                      <div
-                        key={i}
-                        className="bg-cyan-500/5 border border-cyan-500/20 rounded p-3"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg font-bold text-cyan-300">
-                            {leg.percentage}%
-                          </span>
-                          <span className="text-xs text-slate-300">
-                            {leg.description}
-                          </span>
-                        </div>
-                        <div className="text-[10px] text-slate-400 mt-1">
-                          {leg.reason}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Winning path */}
-              {result.winningPath && (
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
-                    Winning path #{result.winningPath.index} --{" "}
-                    {result.winningPath.hops.length} hop(s), risk{" "}
-                    {result.winningPath.riskScore}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {result.winningPath.hops.map((hop, i) => (
-                      <div key={i} className="flex items-center gap-2">
-                        {i > 0 && (
-                          <span className="text-slate-600">
-                            -&gt;
-                          </span>
-                        )}
-                        <div className="px-2 py-1 bg-slate-900 border border-slate-700 rounded text-[10px]">
-                          <div className="text-slate-400">
-                            {hop.type}
-                          </div>
-                          <div className="text-white font-mono">
-                            {hop.currency ?? "XRP"}
-                            {hop.account
-                              ? ` / ${hop.account.slice(0, 6)}...`
-                              : ""}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Rejected */}
-              {result.rejected.length > 0 && (
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">
-                    Rejected alternatives ({result.rejected.length})
-                  </div>
-                  <div className="space-y-2">
-                    {result.rejected.map((r) => (
-                      <div
-                        key={r.pathIndex}
-                        className="bg-red-500/5 border border-red-500/30 rounded p-2 text-xs"
-                      >
-                        <div className="text-red-300">{r.reason}</div>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {r.flags.map((f) => (
-                            <span
-                              key={f}
-                              className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-red-500/15 text-red-400 border border-red-500/30"
-                            >
-                              {f}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* ── Styled Compliance Report ──────────────────────────────── */}
-        {report && (
-          <div className="mb-4 max-w-[900px] mx-auto" data-testid="sp-full-report">
-            {/* Report header card */}
-            <div className="rounded-xl border border-slate-800 bg-[#0f172a] px-8 py-6 mb-5">
-              <div className="flex justify-between items-start flex-wrap gap-3">
-                <div>
-                  <div className="text-[9px] font-bold tracking-[2px] uppercase text-xrp-500 mb-1">
-                    CorLens Safe Path Compliance Report
-                  </div>
-                  <h2 className="text-xl font-bold text-white">
-                    {srcCcy} &rarr; {dstCcy} &middot; {amount} {srcCcy}
-                  </h2>
-                </div>
-                <Button
-                  onClick={downloadReport}
-                  variant="secondary"
-                  size="sm"
-                  data-testid="sp-download"
-                >
-                  Download .md
-                </Button>
-              </div>
-
-              {result && (
-                <div
-                  className="mt-4 rounded-md border-l-[3px] px-4 py-3 text-[13px] leading-relaxed text-slate-400"
-                  style={{
-                    background: "#020617",
-                    borderLeftColor:
-                      result.verdict === "SAFE" || result.verdict === "OFF_CHAIN_ROUTED"
-                        ? "#22c55e"
-                        : result.verdict === "REJECTED"
-                          ? "#ef4444"
-                          : "#f59e0b",
-                  }}
-                >
-                  {result.reasoning}
-                </div>
-              )}
-            </div>
-
-            {/* Section navigation */}
-            {reportSections.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto mb-5 pb-1 sticky top-14 z-10 bg-slate-950/95 backdrop-blur py-2 px-1 -mx-1 rounded-lg">
-                {reportSections.map((s) => (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => scrollToSection(s.id)}
-                    className={`shrink-0 px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-colors ${
-                      activeSectionId === s.id
-                        ? "bg-xrp-500/20 text-xrp-300 border-xrp-500/40"
-                        : "bg-slate-800/50 text-slate-400 border-slate-700 hover:text-white hover:border-slate-500"
-                    }`}
-                  >
-                    {s.title}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Report sections */}
-            {reportSections.map((section) => (
-              <div
-                key={section.id}
-                id={`report-section-${section.id}`}
-                className="rounded-xl border border-slate-800 bg-[#0f172a] px-8 py-5 mb-5"
-              >
-                <h3
-                  className="text-[11px] font-bold tracking-[2px] uppercase text-slate-500 mb-3 pb-2 border-b border-slate-800"
-                >
-                  {section.title}
-                </h3>
-                <div className="space-y-1">
-                  {section.lines.map((line, idx) =>
-                    renderMdLine(line, idx),
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
     </PremiumGate>
   );
 }
@@ -1876,11 +1914,7 @@ function VerdictBadge({
   verdict: SafePathResult["verdict"];
 }) {
   if (verdict === "SAFE" || verdict === "OFF_CHAIN_ROUTED") {
-    return (
-      <Badge variant="low">
-        {verdict === "SAFE" ? "SAFE" : "ROUTED"}
-      </Badge>
-    );
+    return <Badge variant="low">{verdict === "SAFE" ? "SAFE" : "ROUTED"}</Badge>;
   }
   return <Badge variant="high">{verdict}</Badge>;
 }
@@ -1891,18 +1925,14 @@ function EventRow({ event }: { event: SafePathEvent }) {
       return (
         <div className="text-xrp-300">
           * <span className="font-semibold">{event.step}</span>
-          {event.detail && (
-            <span className="text-slate-400"> -- {event.detail}</span>
-          )}
+          {event.detail && <span className="text-slate-400"> -- {event.detail}</span>}
         </div>
       );
     case "tool_call":
       return (
         <div className="text-amber-300">
           &gt; <span className="font-semibold">{event.name}</span>
-          <span className="text-slate-500">
-            ({JSON.stringify(event.args)})
-          </span>
+          <span className="text-slate-500">({JSON.stringify(event.args)})</span>
         </div>
       );
     case "tool_result":
@@ -1919,9 +1949,7 @@ function EventRow({ event }: { event: SafePathEvent }) {
           <div className="text-cyan-300 text-[10px] uppercase tracking-wider font-semibold">
             Corridor RAG
           </div>
-          <div className="text-cyan-200 text-[10px] mt-0.5">
-            {event.question}
-          </div>
+          <div className="text-cyan-200 text-[10px] mt-0.5">{event.question}</div>
           <div className="text-slate-300 text-[10px] mt-1 whitespace-pre-wrap">
             {event.answer.slice(0, 600)}
           </div>
@@ -1931,31 +1959,32 @@ function EventRow({ event }: { event: SafePathEvent }) {
       return (
         <div className="text-sky-300 pl-4">
           ◉ <span className="font-semibold">{event.name || event.address.slice(0, 12) + "…"}</span>
-          {event.name && <span className="text-slate-500 font-mono text-[9px] ml-1">({event.address.slice(0, 8)}…)</span>}
-          <span className="text-slate-400"> — {event.flags.length} flag(s), risk {event.score}</span>
+          {event.name && (
+            <span className="text-slate-500 font-mono text-[9px] ml-1">
+              ({event.address.slice(0, 8)}…)
+            </span>
+          )}
+          <span className="text-slate-400">
+            {" "}
+            — {event.flags.length} flag(s), risk {event.score}
+          </span>
           {event.reason && <span className="text-slate-500 text-[9px] ml-1">[{event.reason}]</span>}
         </div>
       );
     case "partner_depth": {
       const snap = event.snapshot as Record<string, unknown>;
-      const spreadBps =
-        typeof snap.spreadBps === "number"
-          ? snap.spreadBps.toFixed(1)
-          : "?";
+      const spreadBps = typeof snap.spreadBps === "number" ? snap.spreadBps.toFixed(1) : "?";
       return (
         <div className="text-emerald-400 pl-4">
-          o live depth: {String(snap.venue ?? "")} {String(snap.book ?? "")}{" "}
-          -- {spreadBps} bps spread, {String(snap.bidDepthBase ?? "?")} XRP
-          bid
+          o live depth: {String(snap.venue ?? "")} {String(snap.book ?? "")} -- {spreadBps} bps
+          spread, {String(snap.bidDepthBase ?? "?")} XRP bid
         </div>
       );
     }
     case "web_search":
       return (
         <div className="pl-4">
-          <div className="text-violet-300">
-            search: &quot;{event.query}&quot;
-          </div>
+          <div className="text-violet-300">search: &quot;{event.query}&quot;</div>
           {event.results.slice(0, 3).map((r, i) => (
             <div key={i} className="text-slate-400 pl-4 text-[10px]">
               {r}
@@ -1966,26 +1995,18 @@ function EventRow({ event }: { event: SafePathEvent }) {
     case "analysis_started":
       return (
         <div className="text-sky-300">
-          * deep analysis started:{" "}
-          <span className="font-semibold">{event.label}</span>
-          <span className="text-slate-500 text-[10px] ml-1">
-            ({event.address.slice(0, 10)}...)
-          </span>
+          * deep analysis started: <span className="font-semibold">{event.label}</span>
+          <span className="text-slate-500 text-[10px] ml-1">({event.address.slice(0, 10)}...)</span>
         </div>
       );
     case "analysis_complete":
       return (
         <div className="text-sky-300 pl-4">
-          + analysis complete: {event.nodeCount} nodes, {event.edgeCount}{" "}
-          edges
+          + analysis complete: {event.nodeCount} nodes, {event.edgeCount} edges
         </div>
       );
     case "analyses_summary":
-      return (
-        <div className="text-sky-300">
-          * {event.analyses.length} deep analyses completed
-        </div>
-      );
+      return <div className="text-sky-300">* {event.analyses.length} deep analyses completed</div>;
     case "rag_answer":
       return (
         <div className="pl-4 border-l-2 border-cyan-500/30 ml-2">
@@ -2000,32 +2021,19 @@ function EventRow({ event }: { event: SafePathEvent }) {
     case "split_plan":
       return (
         <div className="text-cyan-300">
-          * split plan:{" "}
-          {event.legs
-            .map((l: SplitLeg) => `${l.percentage}%`)
-            .join(" / ")}
+          * split plan: {event.legs.map((l: SplitLeg) => `${l.percentage}%`).join(" / ")}
         </div>
       );
     case "report":
       return (
-        <div className="text-emerald-300">
-          * Report generated ({event.report.length} chars)
-        </div>
+        <div className="text-emerald-300">* Report generated ({event.report.length} chars)</div>
       );
     case "result":
-      return (
-        <div className="text-xrp-300 font-semibold">
-          ** verdict: {event.result.verdict}
-        </div>
-      );
+      return <div className="text-xrp-300 font-semibold">** verdict: {event.result.verdict}</div>;
     case "error":
       return <div className="text-red-400">! {event.error}</div>;
     case "corridor_context":
-      return (
-        <div className="text-emerald-300">
-          * corridor resolved: {event.corridor.label}
-        </div>
-      );
+      return <div className="text-emerald-300">* corridor resolved: {event.corridor.label}</div>;
     case "corridor_update":
       return (
         <div className="text-emerald-300">
@@ -2033,11 +2041,7 @@ function EventRow({ event }: { event: SafePathEvent }) {
         </div>
       );
     case "path_active":
-      return (
-        <div className="text-xrp-300">
-          * evaluating path #{event.pathIndex}
-        </div>
-      );
+      return <div className="text-xrp-300">* evaluating path #{event.pathIndex}</div>;
     case "path_rejected":
       return (
         <div className="text-red-300 pl-4">

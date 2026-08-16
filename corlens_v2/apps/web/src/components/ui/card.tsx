@@ -4,9 +4,17 @@ import { cn } from "../../lib/utils.js";
 export type CardProps = React.HTMLAttributes<HTMLDivElement>;
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("app-glass-surface rounded-xl", className)} {...props} />
+  <div ref={ref} className={cn("app-glass-surface", className)} {...props} />
 ));
 Card.displayName = "Card";
+
+/** Card variant with the angular corner-cut + slow drift used for hero/dashboard panels. */
+export const FloatingCard = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, ...props }, ref) => (
+    <div ref={ref} className={cn("app-glass-surface floating-panel", className)} {...props} />
+  ),
+);
+FloatingCard.displayName = "FloatingCard";
 
 export const CardHeader = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, ...props }, ref) => (

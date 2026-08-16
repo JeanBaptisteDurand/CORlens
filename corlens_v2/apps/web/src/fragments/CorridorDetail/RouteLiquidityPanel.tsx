@@ -5,10 +5,7 @@ interface RouteLiquidityPanelProps {
   destSymbol: string;
 }
 
-export function RouteLiquidityPanel({
-  route,
-  destSymbol,
-}: RouteLiquidityPanelProps) {
+export function RouteLiquidityPanel({ route, destSymbol }: RouteLiquidityPanelProps) {
   const liquidity = route.liquidity;
 
   return (
@@ -64,9 +61,7 @@ function LiquidityRow({ label, value, hint }: LiquidityRowProps) {
   return (
     <div className="flex items-baseline justify-between gap-2 border-b border-slate-800 pb-1 last:border-0">
       <div>
-        <div className="text-[10px] uppercase tracking-wide text-slate-500">
-          {label}
-        </div>
+        <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
         {hint && <div className="text-[9px] text-slate-600">{hint}</div>}
       </div>
       <div className="font-mono text-sm text-white">{value}</div>

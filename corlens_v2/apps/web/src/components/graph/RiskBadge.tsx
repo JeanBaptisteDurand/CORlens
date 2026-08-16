@@ -25,7 +25,6 @@ export function RiskBadge({ riskFlags }: RiskBadgeProps) {
         top: -6,
         right: -6,
         backgroundColor: color,
-        borderRadius: "50%",
         width: 18,
         height: 18,
         display: "flex",
@@ -35,7 +34,7 @@ export function RiskBadge({ riskFlags }: RiskBadgeProps) {
         fontWeight: 700,
         color: "#fff",
         zIndex: 10,
-        border: "2px solid #020617",
+        border: "2px solid #020409",
         boxShadow: `0 0 6px ${color}80`,
       }}
     >

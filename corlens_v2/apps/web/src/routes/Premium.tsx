@@ -1,16 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../components/ui/card";
-import { Button } from "../components/ui/button";
-import { Badge } from "../components/ui/badge";
-import { useAuth } from "../auth/useAuth.js";
-import { api } from "../api/index.js";
 import sdk from "@crossmarkio/sdk";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { api } from "../api/index.js";
+import { useAuth } from "../auth/useAuth.js";
+import { Badge } from "../components/ui/badge";
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 type PaymentStep = "choose" | "paying" | "confirming" | "done";
 
@@ -154,12 +149,15 @@ export default function Premium() {
   // Already premium (and not just paid)
   if (isPremium && step !== "done") {
     return (
-      <div className="app-content-min-height relative overflow-hidden">
-        <div className="route-atmosphere absolute inset-0 -z-10" aria-hidden />
+      <div className="app-content-min-height relative overflow-hidden bg-[#020409]">
         <section className="mx-auto max-w-lg px-6 pt-28 pb-20 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/16 border border-emerald-500/32">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center bg-emerald-500/16 border border-emerald-500/32">
             <svg className="h-6 w-6 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
             </svg>
           </div>
           <h1 className="mb-2 text-2xl font-bold text-white">Premium Active</h1>
@@ -173,32 +171,28 @@ export default function Premium() {
   }
 
   return (
-    <div className="app-content-min-height relative overflow-hidden">
-      <div className="route-atmosphere absolute inset-0 -z-10" aria-hidden />
-
+    <div className="app-content-min-height relative overflow-hidden bg-[#020409]">
       <section className="mx-auto max-w-2xl px-6 pt-20 pb-16">
         <div className="flex flex-col items-center gap-4 text-center mb-10">
           <Badge variant="info" className="px-3 py-1 text-xs">
             On-chain Payment
           </Badge>
-          <h1 className="text-3xl font-bold tracking-tight text-white">
-            Unlock Premium
-          </h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Unlock Premium</h1>
           <p className="max-w-md text-sm leading-relaxed text-slate-400">
-            Pay once to unlock the Safe Path Agent and Compliance PDF export.
-            Payment settles on XRPL Testnet.
+            Pay once to unlock the Safe Path Agent and Compliance PDF export. Payment settles on
+            XRPL Testnet.
           </p>
         </div>
 
         {error && (
-          <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="mb-6 border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
             {error}
           </div>
         )}
 
         {/* Price */}
         <div className="mb-8">
-          <div className="app-glass-surface rounded-xl p-5 text-center border-[color:var(--page-accent-400)] bg-[color:color-mix(in_srgb,var(--page-accent-500)_8%,transparent)]">
+          <div className="app-glass-surface p-5 text-center border-[color:var(--page-accent-400)] bg-[color:color-mix(in_srgb,var(--page-accent-500)_8%,transparent)]">
             <h3 className="text-2xl font-bold text-slate-100">10 XRP</h3>
             <p className="mt-1 text-sm text-slate-400">One-time payment on XRPL Testnet</p>
           </div>
@@ -213,8 +207,7 @@ export default function Premium() {
             disabled={step !== "choose" || !crossmarkAvailable}
             className="w-full py-3"
           >
-            {step === "choose" &&
-              `Pay ${currency === "XRP" ? "10 XRP" : "5 RLUSD"} with Crossmark`}
+            {step === "choose" && `Pay ${currency === "XRP" ? "10 XRP" : "5 RLUSD"} with Crossmark`}
             {step === "paying" && "Signing transaction..."}
             {step === "confirming" && "Waiting for confirmation..."}
             {step === "done" && "Payment confirmed"}
@@ -261,13 +254,9 @@ export default function Premium() {
         )}
 
         {step === "done" && txHash && (
-          <div className="mt-6 app-glass-surface rounded-xl p-5 text-center">
-            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/16 border border-emerald-500/32">
-              <svg
-                className="h-5 w-5 text-emerald-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
+          <div className="mt-6 app-glass-surface p-5 text-center">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center bg-emerald-500/16 border border-emerald-500/32">
+              <svg className="h-5 w-5 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
                 <path
                   fillRule="evenodd"
                   d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
@@ -301,12 +290,8 @@ export default function Premium() {
           </CardHeader>
           <CardContent>
             <ol className="list-decimal ml-4 space-y-1 text-xs text-slate-400">
-              <li>
-                Choose your payment method — Crossmark wallet or demo wallet
-              </li>
-              <li>
-                A real XRPL Testnet Payment transaction is signed and submitted
-              </li>
+              <li>Choose your payment method — Crossmark wallet or demo wallet</li>
+              <li>A real XRPL Testnet Payment transaction is signed and submitted</li>
               <li>We verify the on-chain payment via the transaction memo</li>
               <li>Your account is upgraded to Premium instantly</li>
             </ol>

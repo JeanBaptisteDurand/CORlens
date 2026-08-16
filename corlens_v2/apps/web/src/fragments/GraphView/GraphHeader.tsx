@@ -17,7 +17,7 @@ interface GraphHeaderProps {
 
 export function GraphHeader({ seedLabel, stats, children }: GraphHeaderProps) {
   return (
-    <div className="shrink-0 flex flex-wrap items-center gap-3 border-b border-slate-800 bg-slate-950 px-4 py-2">
+    <div className="shrink-0 flex flex-wrap items-center gap-3 border-b border-[color:var(--app-glass-panel-border)] bg-app-bg-secondary px-4 py-2">
       <span className="mr-2 text-sm font-medium text-white">{seedLabel}</span>
 
       <Badge variant="default">{stats?.totalNodes ?? 0} nodes</Badge>

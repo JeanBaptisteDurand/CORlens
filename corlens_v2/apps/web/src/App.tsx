@@ -3,7 +3,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/layout/Layout.js";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card.js";
 
-const Landing = lazy(() => import("./routes/Landing/Landing.js"));
 const Home = lazy(() => import("./routes/Home.js"));
 const Analyze = lazy(() => import("./routes/Analyze.js"));
 const GraphView = lazy(() => import("./routes/GraphView.js"));
@@ -34,7 +33,7 @@ function PlaceholderPage({ title }: { title: string }): JSX.Element {
   );
 }
 
-function LandingFallback(): JSX.Element {
+function RouteFallback(): JSX.Element {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-950">
       <span className="inline-block h-7 w-7 animate-spin rounded-full border-4 border-xrp-500/30 border-t-xrp-500" />
@@ -46,19 +45,11 @@ export function App(): JSX.Element {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route path="/" element={<Navigate to="/landing" replace />} />
-        <Route
-          path="/landing"
-          element={
-            <Suspense fallback={<LandingFallback />}>
-              <Landing />
-            </Suspense>
-          }
-        />
+        <Route path="/" element={<Navigate to="/home" replace />} />
         <Route
           path="/home"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <Home />
             </Suspense>
           }
@@ -66,7 +57,7 @@ export function App(): JSX.Element {
         <Route
           path="/corridors"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <CorridorHealth />
             </Suspense>
           }
@@ -74,7 +65,7 @@ export function App(): JSX.Element {
         <Route
           path="/corridors/:id"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <CorridorDetail />
             </Suspense>
           }
@@ -82,7 +73,7 @@ export function App(): JSX.Element {
         <Route
           path="/corridor-route/:id/:routeId"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <CorridorRoute />
             </Suspense>
           }
@@ -90,7 +81,7 @@ export function App(): JSX.Element {
         <Route
           path="/analyze"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <Analyze />
             </Suspense>
           }
@@ -98,7 +89,7 @@ export function App(): JSX.Element {
         <Route
           path="/graph/:analysisId"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <GraphView />
             </Suspense>
           }
@@ -106,7 +97,7 @@ export function App(): JSX.Element {
         <Route
           path="/chat/:analysisId"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <Chat />
             </Suspense>
           }
@@ -114,7 +105,7 @@ export function App(): JSX.Element {
         <Route
           path="/safe-path"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <SafePath />
             </Suspense>
           }
@@ -122,7 +113,7 @@ export function App(): JSX.Element {
         <Route
           path="/history"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <History />
             </Suspense>
           }
@@ -130,7 +121,7 @@ export function App(): JSX.Element {
         <Route
           path="/developers"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <ApiDocs />
             </Suspense>
           }
@@ -138,7 +129,7 @@ export function App(): JSX.Element {
         <Route
           path="/premium"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <Premium />
             </Suspense>
           }
@@ -146,7 +137,7 @@ export function App(): JSX.Element {
         <Route
           path="/account"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <Account />
             </Suspense>
           }
@@ -154,7 +145,7 @@ export function App(): JSX.Element {
         <Route
           path="/compliance/:analysisId"
           element={
-            <Suspense fallback={<LandingFallback />}>
+            <Suspense fallback={<RouteFallback />}>
               <ComplianceView />
             </Suspense>
           }

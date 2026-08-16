@@ -260,7 +260,7 @@ function HistoryInner({ embedded }: { embedded?: boolean }) {
                   <CardTitle className="text-sm flex items-center gap-2">
                     Progress
                     {state.status === "streaming" && (
-                      <span className="inline-block w-2 h-2 bg-xrp-400 rounded-full animate-pulse" />
+                      <span className="inline-block w-2 h-2 bg-xrp-400 animate-pulse" />
                     )}
                   </CardTitle>
                 </CardHeader>
@@ -390,9 +390,8 @@ function HistoryInner({ embedded }: { embedded?: boolean }) {
               style={{
                 height: "calc(100vh - 260px)",
                 minHeight: 640,
-                background: "#020617",
-                border: "1px solid #1e293b",
-                borderRadius: 8,
+                background: "#020409",
+                border: "1px solid rgba(244,246,250,0.14)",
                 overflow: "hidden",
                 position: "relative",
               }}
@@ -404,7 +403,7 @@ function HistoryInner({ embedded }: { embedded?: boolean }) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    color: "#475569",
+                    color: "#5A6483",
                     fontSize: 13,
                     flexDirection: "column",
                     gap: 8,
@@ -441,18 +440,22 @@ function HistoryInner({ embedded }: { embedded?: boolean }) {
                   nodesDraggable
                   nodesConnectable={false}
                   proOptions={{ hideAttribution: true }}
-                  style={{ background: "#020617" }}
+                  style={{ background: "#020409" }}
                 >
                   <AutoFitView nodeCount={rfNodes.length} status={state.status} />
                   <DepthRingsBackground depthConfigs={depthConfigs} />
-                  <Background variant={BackgroundVariant.Dots} color="#1e293b" gap={30} size={1} />
+                  <Background
+                    variant={BackgroundVariant.Dots}
+                    color="rgba(244,246,250,0.14)"
+                    gap={30}
+                    size={1}
+                  />
                   <Controls
                     showInteractive={false}
                     position="bottom-right"
                     style={{
-                      background: "#0f172a",
-                      border: "1px solid #1e293b",
-                      borderRadius: 8,
+                      background: "#0B0F1C",
+                      border: "1px solid rgba(244,246,250,0.14)",
                     }}
                   />
                   <MiniMap
@@ -468,17 +471,17 @@ function HistoryInner({ embedded }: { embedded?: boolean }) {
                         seed: "#f59e0b",
                         amm: "#3b82f6",
                         issuer: "#ef4444",
-                        multisig_member: "#64748b",
+                        multisig_member: "#7C8AA0",
                         escrow_dest: "#f97316",
                         check_dest: "#ec4899",
                         channel_dest: "#14b8a6",
-                        account_light: "#475569",
+                        account_light: "#5A6483",
                       };
                       return map[hn.kind] ?? "#334155";
                     }}
                     style={{
-                      background: "#0f172a",
-                      border: "1px solid #1e293b",
+                      background: "#0B0F1C",
+                      border: "1px solid rgba(244,246,250,0.14)",
                     }}
                     maskColor="rgba(2,6,23,0.8)"
                   />
@@ -494,20 +497,18 @@ function HistoryInner({ embedded }: { embedded?: boolean }) {
                     top: 10,
                     left: 10,
                     background: "rgba(2,6,23,0.92)",
-                    border: "1px solid #1e293b",
-                    borderRadius: 8,
+                    border: "1px solid rgba(244,246,250,0.14)",
                     padding: "8px 12px",
                     fontSize: 10,
-                    color: "#cbd5e1",
+                    color: "#C5CBE0",
                     maxWidth: 240,
-                    backdropFilter: "blur(6px)",
                   }}
                 >
                   <div
                     style={{
                       fontSize: 9,
                       fontWeight: 800,
-                      color: "#64748b",
+                      color: "#7C8AA0",
                       letterSpacing: 1,
                       textTransform: "uppercase",
                       marginBottom: 6,
@@ -529,7 +530,6 @@ function HistoryInner({ embedded }: { embedded?: boolean }) {
                           style={{
                             width: 9,
                             height: 9,
-                            borderRadius: 2,
                             background: k.color,
                             boxShadow: `0 0 6px ${k.color}80`,
                             flexShrink: 0,
@@ -543,7 +543,7 @@ function HistoryInner({ embedded }: { embedded?: boolean }) {
                     style={{
                       fontSize: 9,
                       fontWeight: 800,
-                      color: "#64748b",
+                      color: "#7C8AA0",
                       letterSpacing: 1,
                       textTransform: "uppercase",
                       marginBottom: 5,

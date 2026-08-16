@@ -29,24 +29,14 @@ export function Navbar(): JSX.Element {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-6 bg-slate-950/56 backdrop-blur-md border-b border-[color:var(--app-glass-panel-border)] shadow-[0_8px_26px_rgba(6,10,28,0.28)]">
-      <NavLink
-        to="/home"
-        className="group flex items-center gap-3 select-none"
-        aria-label="Go to corelens home"
-      >
-        <div className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl border border-[rgba(151,214,239,0.5)] bg-[linear-gradient(145deg,#7ff2bf_8%,#8f9dff_56%,#6fd8b7_100%)] shadow-[0_8px_20px_rgba(72,128,173,0.35)] transition-transform duration-200 group-hover:scale-[1.04]">
-          <span className="pointer-events-none absolute inset-[1px] rounded-[10px] bg-slate-950/28" />
-          <span className="relative text-[0.72rem] font-black leading-none tracking-[-0.06em] text-white">
-            CL
-          </span>
-        </div>
-        <span className="bg-[linear-gradient(120deg,#7ff2bf_0%,#8f9dff_56%,#72e6a0_100%)] bg-clip-text text-base font-semibold tracking-[0.05em] lowercase text-transparent">
+    <nav className="fixed top-0 left-0 right-0 z-50 h-14 flex items-center justify-between px-6 border-b border-[color:rgba(244,246,250,0.22)] bg-[#020409]/80">
+      <NavLink to="/home" className="select-none" aria-label="Go to corelens home">
+        <span className="text-[15px] font-bold tracking-[-0.01em] text-slate-100 transition-colors duration-200 hover:text-white">
           corelens
         </span>
       </NavLink>
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0">
         {NAV_LINKS.map(({ to, label }) => {
           const isActive =
             to === "/home" ? location.pathname === "/home" : location.pathname.startsWith(to);
@@ -56,23 +46,26 @@ export function Navbar(): JSX.Element {
               key={to}
               to={to}
               className={cn(
-                "px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150",
+                "relative px-4 py-2.5 text-[13px] font-semibold transition-all duration-150",
                 isActive
-                  ? "bg-[linear-gradient(145deg,color-mix(in_srgb,var(--page-accent-500)_16%,transparent),color-mix(in_srgb,var(--page-accent-700)_18%,transparent))] text-[color:var(--page-accent-300)] border border-[color:color-mix(in_srgb,var(--page-accent-300)_52%,transparent)]"
-                  : "text-slate-300 hover:text-slate-100 hover:bg-slate-900/60 border border-transparent hover:border-slate-700/50",
+                  ? "text-slate-100 [text-shadow:0_0_6px_rgba(180,205,255,0.55)]"
+                  : "font-medium text-slate-400 hover:text-slate-100",
               )}
             >
               {label}
+              {isActive && (
+                <span className="pointer-events-none absolute inset-x-4 bottom-0 h-px bg-[#8FB4FF] shadow-[0_0_6px_1px_rgba(110,163,255,0.7)]" />
+              )}
             </NavLink>
           );
         })}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {user ? (
           <>
             {isPremium && (
-              <span className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-emerald-500/16 text-emerald-300 border border-emerald-500/32">
+              <span className="inline-flex items-center px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.12em] bg-emerald-500/16 text-emerald-300 border border-emerald-500/32">
                 Premium
               </span>
             )}
@@ -80,10 +73,10 @@ export function Navbar(): JSX.Element {
               type="button"
               onClick={() => navigate("/account")}
               className={cn(
-                "px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 border",
+                "px-3 py-1.5 text-xs font-medium transition-all duration-150 border",
                 isPremium
-                  ? "bg-slate-900/52 border-[color:var(--app-glass-panel-border)] text-slate-300 hover:bg-slate-900/72"
-                  : "btn-primary-themed text-white border-[color:color-mix(in_srgb,var(--page-accent-400)_44%,transparent)]",
+                  ? "bg-transparent border-[color:var(--app-glass-panel-border)] text-slate-300 hover:bg-white/5"
+                  : "btn-primary-themed text-white border-[color:var(--page-accent-400)]",
               )}
             >
               {user.walletAddress.slice(0, 6)}...{user.walletAddress.slice(-4)}
@@ -91,7 +84,7 @@ export function Navbar(): JSX.Element {
             <button
               type="button"
               onClick={logout}
-              className="px-2.5 py-1.5 rounded-md text-[11px] text-slate-500 hover:text-slate-200 hover:bg-slate-900/60 transition-all duration-150"
+              className="px-2.5 py-1.5 text-[11px] text-slate-500 hover:text-slate-200 hover:bg-white/5 transition-all duration-150"
             >
               Disconnect
             </button>
@@ -100,7 +93,7 @@ export function Navbar(): JSX.Element {
           <button
             type="button"
             onClick={handleConnect}
-            className="px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 btn-primary-themed text-white border border-[color:color-mix(in_srgb,var(--page-accent-400)_44%,transparent)]"
+            className="px-3 py-1.5 text-xs font-medium transition-all duration-150 btn-primary-themed text-white border border-[color:var(--page-accent-400)]"
           >
             Connect Wallet
           </button>
