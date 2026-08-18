@@ -77,7 +77,11 @@ export async function buildApp(env: CorridorEnv): Promise<FastifyInstance> {
     globalHubs: currencyMetaSeeder.globalHubs(),
   });
 
-  const scanner = createScannerService({ marketData, timeoutMs: env.SCAN_TIMEOUT_MS });
+  const scanner = createScannerService({
+    marketData,
+    currencyMeta: currencyMetaService,
+    timeoutMs: env.SCAN_TIMEOUT_MS,
+  });
   const aiNote = createAiNoteService({ ai });
   const ragIndex = createRagIndexService({ ai, repo: ragRepo });
   const chat = createChatService({ ai, repo: ragRepo, topK: 3 });
