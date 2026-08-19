@@ -5,6 +5,7 @@ export type MarketDataClient = {
     sourceAccount: string;
     destinationAccount: string;
     destinationAmount: unknown;
+    sourceCurrencies?: Array<{ currency: string; issuer?: string }>;
   }): Promise<unknown>;
   bookOffers(input: {
     takerGetsCurrency: string;

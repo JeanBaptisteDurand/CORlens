@@ -33,6 +33,10 @@ export const PathFindRequest = z.object({
   sourceAccount: XrplAddress,
   destinationAccount: XrplAddress,
   destinationAmount: z.union([z.string(), Asset.extend({ value: z.string() })]),
+  // Passed through as rippled's source_currencies: which currencies the
+  // probe may spend. Without it, path_find only considers currencies the
+  // source account actually holds.
+  sourceCurrencies: z.array(Asset).optional(),
 });
 
 // ─── Generic envelope ────────────────────────────────────────────

@@ -179,12 +179,14 @@ export const fetchPaymentPaths = (
   sourceAccount: string,
   destAccount: string,
   destAmount: unknown,
+  sourceCurrencies?: unknown[],
 ) =>
   c.pathFind({
     subcommand: "create",
     source_account: sourceAccount,
     destination_account: destAccount,
     destination_amount: destAmount,
+    ...(sourceCurrencies?.length ? { source_currencies: sourceCurrencies } : {}),
   });
 
 export async function fetchNFTBuyOffers(

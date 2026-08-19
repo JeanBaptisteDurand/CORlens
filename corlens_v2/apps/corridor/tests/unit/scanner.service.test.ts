@@ -38,7 +38,7 @@ describe("scanner.service", () => {
     expect(out.pathCount).toBe(2);
   });
 
-  it("resolves the destination issuer from currency meta when the asset lacks one", async () => {
+  it("probes delivery to the destination issuer with XRP + source fiat as source currencies", async () => {
     const marketData = {
       pathFind: vi.fn().mockResolvedValue({ result: { alternatives: [{}] } }),
       bookOffers: vi.fn(),
@@ -57,11 +57,15 @@ describe("scanner.service", () => {
       amount: "1000",
     });
     expect(currencyMeta.getByCode).toHaveBeenCalledWith("EUR");
-    expect(marketData.pathFind).toHaveBeenCalledWith(
-      expect.objectContaining({
-        destinationAmount: { currency: "EUR", issuer: BITSTAMP, value: "1000" },
-      }),
-    );
+    expect(currencyMeta.getByCode).toHaveBeenCalledWith("USD");
+    // The destination issuer is the only account guaranteed to be able to
+    // receive its own IOU, so it serves as both ends of the probe.
+    expect(marketData.pathFind).toHaveBeenCalledWith({
+      sourceAccount: BITSTAMP,
+      destinationAccount: BITSTAMP,
+      destinationAmount: { currency: "EUR", issuer: BITSTAMP, value: "1000" },
+      sourceCurrencies: [{ currency: "XRP" }, { currency: "USD", issuer: BITSTAMP }],
+    });
   });
 
   it("keeps the corridor asset's explicit issuer without a meta lookup", async () => {
@@ -78,19 +82,52 @@ describe("scanner.service", () => {
     });
     await svc.scan({
       id: "usd-eur",
-      source: { currency: "USD" },
+      source: { currency: "USD", issuer: "rSRCissuer111111111111111111111111" },
       dest: { currency: "EUR", issuer: "rEXPLicit1111111111111111111111111" },
       amount: "1000",
     });
     expect(currencyMeta.getByCode).not.toHaveBeenCalled();
+    expect(marketData.pathFind).toHaveBeenCalledWith({
+      sourceAccount: "rEXPLicit1111111111111111111111111",
+      destinationAccount: "rEXPLicit1111111111111111111111111",
+      destinationAmount: {
+        currency: "EUR",
+        issuer: "rEXPLicit1111111111111111111111111",
+        value: "1000",
+      },
+      sourceCurrencies: [
+        { currency: "XRP" },
+        { currency: "USD", issuer: "rSRCissuer111111111111111111111111" },
+      ],
+    });
+  });
+
+  it("probes with XRP only when the source currency has no known issuer", async () => {
+    const marketData = {
+      pathFind: vi.fn().mockResolvedValue({ result: { alternatives: [{}] } }),
+      bookOffers: vi.fn(),
+      partnerDepth: vi.fn(),
+    };
+    const currencyMeta = {
+      getByCode: vi
+        .fn()
+        .mockImplementation(async (code: string) =>
+          code === "EUR" ? { issuers: [{ address: BITSTAMP }] } : { issuers: [] },
+        ),
+    };
+    const svc = createScannerService({
+      marketData: marketData as never,
+      currencyMeta,
+      timeoutMs: 5000,
+    });
+    await svc.scan({
+      id: "ars-eur",
+      source: { currency: "ARS" },
+      dest: { currency: "EUR" },
+      amount: "1000",
+    });
     expect(marketData.pathFind).toHaveBeenCalledWith(
-      expect.objectContaining({
-        destinationAmount: {
-          currency: "EUR",
-          issuer: "rEXPLicit1111111111111111111111111",
-          value: "1000",
-        },
-      }),
+      expect.objectContaining({ sourceCurrencies: [{ currency: "XRP" }] }),
     );
   });
 

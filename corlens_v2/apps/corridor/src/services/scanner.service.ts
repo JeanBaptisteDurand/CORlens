@@ -53,14 +53,33 @@ export function createScannerService(opts: ScannerServiceOptions) {
       // The corridor catalog stores abstract assets (currency only); real
       // XRPL issuers live in CurrencyMeta. An IOU path_find without a valid
       // issuer is always rejected upstream, so resolve one or skip the call.
-      let destinationAmount: unknown = input.amount;
-      if (input.dest.currency !== "XRP") {
-        let issuer = input.dest.issuer ?? null;
-        if (!issuer && opts.currencyMeta) {
-          const meta = await opts.currencyMeta.getByCode(input.dest.currency);
-          issuer = meta?.issuers?.[0]?.address ?? null;
-        }
-        if (!issuer) {
+      const resolveIssuer = async (asset: { currency: string; issuer?: string }) => {
+        if (asset.issuer) return asset.issuer;
+        if (!opts.currencyMeta || asset.currency === "XRP") return null;
+        const meta = await opts.currencyMeta.getByCode(asset.currency);
+        return meta?.issuers?.[0]?.address ?? null;
+      };
+
+      // Probe shape: can DST.issuer be delivered on the DEX, spending XRP
+      // (the ODL bridge leg) or the source fiat? The destination issuer is
+      // the only account guaranteed to accept its own IOU, so it serves as
+      // both ends of the probe — a genesis-style account with no trustlines
+      // can neither send nor receive IOUs and always yields 0 paths.
+      let request: {
+        sourceAccount: string;
+        destinationAccount: string;
+        destinationAmount: unknown;
+        sourceCurrencies?: Array<{ currency: string; issuer?: string }>;
+      };
+      if (input.dest.currency === "XRP") {
+        request = {
+          sourceAccount: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh",
+          destinationAccount: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh",
+          destinationAmount: input.amount,
+        };
+      } else {
+        const destIssuer = await resolveIssuer(input.dest);
+        if (!destIssuer) {
           return {
             corridorId: input.id,
             status: "UNKNOWN",
@@ -73,16 +92,25 @@ export function createScannerService(opts: ScannerServiceOptions) {
             error: "no_known_issuer",
           };
         }
-        destinationAmount = { currency: input.dest.currency, issuer, value: input.amount };
+        const sourceIssuer = await resolveIssuer(input.source);
+        request = {
+          sourceAccount: destIssuer,
+          destinationAccount: destIssuer,
+          destinationAmount: {
+            currency: input.dest.currency,
+            issuer: destIssuer,
+            value: input.amount,
+          },
+          sourceCurrencies: [
+            { currency: "XRP" },
+            ...(sourceIssuer ? [{ currency: input.source.currency, issuer: sourceIssuer }] : []),
+          ],
+        };
       }
 
       try {
         const result = (await Promise.race([
-          opts.marketData.pathFind({
-            sourceAccount: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh",
-            destinationAccount: "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh",
-            destinationAmount,
-          }),
+          opts.marketData.pathFind(request),
           new Promise((_, reject) =>
             setTimeout(() => reject(new Error("scan_timeout")), opts.timeoutMs),
           ),

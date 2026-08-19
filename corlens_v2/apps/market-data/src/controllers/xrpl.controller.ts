@@ -205,6 +205,7 @@ export async function registerXrplRoutes(app: FastifyInstance, svc: XrplService)
         req.body.sourceAccount,
         req.body.destinationAccount,
         req.body.destinationAmount,
+        req.body.sourceCurrencies,
       ) as Promise<Raw>,
   );
 }

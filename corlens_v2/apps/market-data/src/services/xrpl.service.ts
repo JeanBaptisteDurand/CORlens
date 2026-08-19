@@ -97,7 +97,18 @@ export function createXrplService(opts: XrplServiceOptions) {
       cache.getOrSet(`nft:sell:${nftId}:${limit}`, ttl.nft, () =>
         fetchers.fetchNFTSellOffers(client, nftId, limit),
       ),
-    pathFind: (sourceAccount: string, destinationAccount: string, destinationAmount: unknown) =>
-      fetchers.fetchPaymentPaths(client, sourceAccount, destinationAccount, destinationAmount),
+    pathFind: (
+      sourceAccount: string,
+      destinationAccount: string,
+      destinationAmount: unknown,
+      sourceCurrencies?: unknown[],
+    ) =>
+      fetchers.fetchPaymentPaths(
+        client,
+        sourceAccount,
+        destinationAccount,
+        destinationAmount,
+        sourceCurrencies,
+      ),
   };
 }
