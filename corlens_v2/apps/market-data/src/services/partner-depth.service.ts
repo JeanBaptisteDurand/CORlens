@@ -15,9 +15,29 @@ export type PartnerDepthServiceOptions = {
 
 export type PartnerDepthService = ReturnType<typeof createPartnerDepthService>;
 
+// Callers send a venue-neutral "XRP/MXN"; every venue spells its pairs
+// differently (Bitso xrp_mxn, Bitstamp xrpusd, Kraken/Binance XRPUSD).
+export function normalizeBook(actor: PartnerActor, book: string): string {
+  const parts = book.split(/[/_-]/).filter(Boolean);
+  if (parts.length !== 2) return book;
+  const [base, quote] = parts as [string, string];
+  switch (actor) {
+    case "bitso":
+      return `${base}_${quote}`.toLowerCase();
+    case "bitstamp":
+      return `${base}${quote}`.toLowerCase();
+    case "kraken":
+    case "binance":
+      return `${base}${quote}`.toUpperCase();
+    default:
+      return book;
+  }
+}
+
 export function createPartnerDepthService(opts: PartnerDepthServiceOptions) {
   return {
-    async fetch(actor: PartnerActor, book: string): Promise<PartnerDepthSnapshot> {
+    async fetch(actor: PartnerActor, rawBook: string): Promise<PartnerDepthSnapshot> {
+      const book = normalizeBook(actor, rawBook);
       const key = `partner:${actor}:${book}`;
       return opts.cache.getOrSet(key, opts.ttlSeconds, async () => {
         switch (actor) {
@@ -31,7 +51,7 @@ export function createPartnerDepthService(opts: PartnerDepthServiceOptions) {
             return fetchBinanceDepth({ symbol: book, ttlSeconds: opts.ttlSeconds });
           case "xrpl-dex":
             return fetchXrplDexDepth({
-              pairKey: book,
+              pairKey: rawBook,
               client: opts.xrpl,
               ttlSeconds: opts.ttlSeconds,
             });
