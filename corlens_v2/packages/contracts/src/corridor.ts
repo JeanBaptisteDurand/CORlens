@@ -25,12 +25,19 @@ export const CorridorListItem = z.object({
   shortLabel: z.string(),
   flag: z.string(),
   tier: CorridorTier,
+  importance: z.number().int(),
   region: z.string(),
   category: z.string(),
+  description: z.string(),
+  useCase: z.string(),
   status: Status,
   pathCount: z.number().int().min(0),
   recRiskScore: z.number().int().nullable(),
   recCost: z.string().nullable(),
+  // Real venue counts for each leg, from CurrencyMeta — the atlas cards
+  // show them as on-ramps/off-ramps without paying for the full actor list.
+  sourceActorCount: z.number().int().min(0),
+  destActorCount: z.number().int().min(0),
   lastRefreshedAt: z.string().datetime().nullable(),
 });
 export type CorridorListItem = z.infer<typeof CorridorListItem>;

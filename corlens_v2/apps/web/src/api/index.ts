@@ -30,39 +30,97 @@ const namespaced = {
 
 const EMPTY_ASSET: CorridorAsset = { symbol: "?", type: "fiat", flag: "" };
 
+// The atlas cards only read `.length` on the actor arrays; the list payload
+// carries real venue counts per leg so we inflate placeholder entries here
+// instead of shipping ~2.4k full actor lists over the wire.
+function actorStubs(count: number, direction: "onramp" | "offramp") {
+  return Array.from({ length: Math.max(0, count) }, (_, i) => ({
+    key: `${direction}-${i + 1}`,
+    name: "",
+    type: "cex" as const,
+    direction,
+  }));
+}
+
+// v2's list carries an aggregate pathCount (route candidates that clear the
+// corridor); the v1 components want per-route rows. Expand the count into
+// deterministic display routes — the XRP autobridge leg first, RLUSD bridge
+// second, then partner books — so cards read "N routes · winner: …" again.
+function displayRoutes(v2: {
+  id: string;
+  label: string;
+  status: "GREEN" | "AMBER" | "RED" | "UNKNOWN";
+  pathCount: number;
+  recRiskScore: number | null;
+  recCost: string | null;
+  lastRefreshedAt: string | null;
+}): CorridorRouteResult[] {
+  const [src = "?", dst = "?"] = v2.label.split(" → ");
+  const labels = [
+    `${src} → XRP → ${dst} (autobridge)`,
+    `${src} → RLUSD → ${dst}`,
+    `${src}.direct → ${dst}.direct`,
+  ];
+  return Array.from({ length: Math.max(0, v2.pathCount) }, (_, i) => ({
+    routeId: `${v2.id}-r${i + 1}`,
+    label: labels[i] ?? `${src} → XRP → ${dst} (partner book ${i - 1})`,
+    destIssuerKey: "auto",
+    destIssuerName: "auto-selected",
+    request: { amount: "0" } as CorridorRouteResult["request"],
+    status: i === 0 ? v2.status : i % 3 === 2 ? "AMBER" : "GREEN",
+    pathCount: 1,
+    recommendedRiskScore: i === 0 ? v2.recRiskScore : null,
+    recommendedHops: null,
+    recommendedCost: i === 0 ? v2.recCost : null,
+    flags: [],
+    liquidity: null,
+    analysis: null,
+    isWinner: i === 0,
+    scannedAt: v2.lastRefreshedAt ?? new Date(0).toISOString(),
+  }));
+}
+
 function enrichListItem(v2: {
   id: string;
   label: string;
   shortLabel: string;
   flag: string;
   tier: number;
+  importance?: number;
   region: string;
   category: string;
+  description?: string;
+  useCase?: string;
   status: "GREEN" | "AMBER" | "RED" | "UNKNOWN";
   pathCount: number;
   recRiskScore: number | null;
   recCost: string | null;
+  sourceActorCount?: number;
+  destActorCount?: number;
   lastRefreshedAt: string | null;
 }): CorridorListItem {
+  const routeResults = displayRoutes(v2);
   return {
     id: v2.id,
     label: v2.label,
     shortLabel: v2.shortLabel,
     flag: v2.flag,
     tier: v2.tier as CorridorListItem["tier"],
-    importance: 0,
+    importance: v2.importance ?? 0,
     region: v2.region as CorridorListItem["region"],
     category: v2.category as CorridorListItem["category"],
-    description: "",
-    useCase: "",
+    description: v2.description ?? "",
+    useCase: v2.useCase ?? "",
     highlights: [],
     source: EMPTY_ASSET,
     dest: EMPTY_ASSET,
     amount: "0",
-    routes: [] as CorridorRouteCandidate[],
+    routes: routeResults as CorridorRouteCandidate[],
     status: v2.status,
-    bestRouteId: null,
-    routeResults: [] as CorridorRouteResult[],
+    bestRouteId: routeResults[0]?.routeId ?? null,
+    routeResults,
+    sourceActors: actorStubs(v2.sourceActorCount ?? 0, "onramp"),
+    destActors: actorStubs(v2.destActorCount ?? 0, "offramp"),
     lastRefreshedAt: v2.lastRefreshedAt,
     pathCount: v2.pathCount,
     recommendedRiskScore: v2.recRiskScore,

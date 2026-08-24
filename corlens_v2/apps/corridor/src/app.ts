@@ -92,8 +92,12 @@ export async function buildApp(env: CorridorEnv): Promise<FastifyInstance> {
   await registerCurrencyMetaRoutes(app, currencyMetaService);
   await registerPartnerDepthRoutes(app, marketData);
   await registerChatRoutes(app, chat);
-  await registerCorridorRoutes(app, corridors, events);
-  await registerAdminRoutes(app, corridors, events, scanner);
+  const actorCounts = new Map<string, number>();
+  for (const row of await currencyMetaRepo.list()) {
+    actorCounts.set(row.code, Array.isArray(row.actors) ? row.actors.length : 0);
+  }
+  await registerCorridorRoutes(app, corridors, events, actorCounts);
+  await registerAdminRoutes(app, corridors, events, scanner, currencyMetaRepo);
 
   const refresh = await startRefreshCron({
     redisUrl: env.REDIS_URL,

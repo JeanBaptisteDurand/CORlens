@@ -137,6 +137,21 @@ export function createCorridorRepo(prisma: Prisma) {
       });
     },
 
+    async updateSeedStatus(
+      id: string,
+      update: { status: string; pathCount: number; flagsJson: unknown },
+    ) {
+      await db.corridor.update({
+        where: { id },
+        data: {
+          status: update.status,
+          pathCount: update.pathCount,
+          flagsJson: update.flagsJson as never,
+          lastRefreshedAt: new Date(),
+        },
+      });
+    },
+
     async updateAiNote(id: string, aiNote: string, hash: string) {
       await db.corridor.update({
         where: { id },

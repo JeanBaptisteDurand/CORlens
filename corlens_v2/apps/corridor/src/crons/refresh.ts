@@ -3,6 +3,7 @@ import IORedis from "ioredis";
 import type { CorridorRepo } from "../repositories/corridor.repo.js";
 import type { StatusEventRepo } from "../repositories/status-event.repo.js";
 import type { ScannerService } from "../services/scanner.service.js";
+import { shouldPreserveExisting } from "../services/seed-status.service.js";
 
 const QUEUE = "corridor-refresh";
 
@@ -36,6 +37,9 @@ export async function startRefreshCron(opts: RefreshOptions): Promise<RefreshHan
             dest: c.destJson as never,
             amount: c.amount,
           });
+          // An empty on-chain probe must not repaint rail-quality statuses —
+          // most corridors settle off-chain and are invisible to path_find.
+          if (shouldPreserveExisting(c.status, result)) continue;
           await opts.corridors.updateScan(c.id, {
             status: result.status,
             pathCount: result.pathCount,

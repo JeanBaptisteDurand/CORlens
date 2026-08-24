@@ -18,29 +18,41 @@ function normalizeAsset(raw: unknown): unknown {
   return raw;
 }
 
-function rowToList(r: Awaited<ReturnType<CorridorRepo["list"]>>[number]) {
-  return {
+function assetCurrency(raw: unknown): string {
+  const a = normalizeAsset(raw) as { currency?: string } | null;
+  return a?.currency ?? "";
+}
+
+function makeRowToList(actorCounts: Map<string, number>) {
+  return (r: Awaited<ReturnType<CorridorRepo["list"]>>[number]) => ({
     id: r.id,
     label: r.label,
     shortLabel: r.shortLabel,
     flag: r.flag,
     tier: r.tier,
+    importance: r.importance,
     region: r.region,
     category: r.category,
+    description: r.description,
+    useCase: r.useCase,
     status: r.status as "GREEN" | "AMBER" | "RED" | "UNKNOWN",
     pathCount: r.pathCount,
     recRiskScore: r.recRiskScore,
     recCost: r.recCost,
+    sourceActorCount: actorCounts.get(assetCurrency(r.sourceJson)) ?? 0,
+    destActorCount: actorCounts.get(assetCurrency(r.destJson)) ?? 0,
     lastRefreshedAt: r.lastRefreshedAt ? r.lastRefreshedAt.toISOString() : null,
-  };
+  });
 }
 
 export async function registerCorridorRoutes(
   app: FastifyInstance,
   corridors: CorridorRepo,
   events: StatusEventRepo,
+  actorCounts: Map<string, number> = new Map(),
 ): Promise<void> {
   const typed = app.withTypeProvider<ZodTypeProvider>();
+  const rowToList = makeRowToList(actorCounts);
 
   typed.get(
     "/api/corridors",

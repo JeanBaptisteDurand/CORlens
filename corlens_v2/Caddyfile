@@ -17,6 +17,10 @@
         level INFO
     }
 
+    # API responses must never be cached by browsers — a stale corridor list
+    # renders empty cards (0 routes) after every backend data change.
+    header /api/* Cache-Control no-store
+
     handle /health {
         respond `{"status":"ok","gateway":"caddy","stage":"dev"}` 200 {
             close
