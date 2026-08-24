@@ -50,10 +50,15 @@ export const CorridorDetail = CorridorListItem.extend({
   amount: z.string().nullable(),
   source: CorridorAsset.nullable(),
   dest: CorridorAsset.nullable(),
+  bestRouteId: z.string().nullable(),
   routes: z.array(z.unknown()),
   flags: z.array(z.unknown()),
   liquidity: z.unknown().nullable(),
   aiNote: z.string().nullable(),
+  // Full actor lists for each leg (from CurrencyMeta, falling back to the
+  // currency's XRPL issuers when no real-world actor is recorded).
+  sourceActors: z.array(z.unknown()),
+  destActors: z.array(z.unknown()),
 });
 export type CorridorDetail = z.infer<typeof CorridorDetail>;
 

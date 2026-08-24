@@ -152,19 +152,47 @@ function enrichListItem(v2: {
   };
 }
 
+// The API stores assets as {currency}; the ported v1 components read
+// {symbol}. Carry both spellings so neither side sees undefined.
+function toAsset(raw: unknown): CorridorAsset {
+  if (!raw || typeof raw !== "object") return EMPTY_ASSET;
+  const a = raw as Record<string, unknown>;
+  const symbol = (a.symbol ?? a.currency ?? "?") as string;
+  return { ...a, symbol, type: (a.type ?? "fiat") as CorridorAsset["type"] } as CorridorAsset;
+}
+
 function enrichDetail(v2: Record<string, unknown>): CorridorDetailResponse {
-  // v2 detail already exposes most CorridorPairDef fields. Fall back to
-  // stubs for the few that don't ride along.
+  // v2 detail already exposes most CorridorPairDef fields — including the
+  // v1 engine's real scanned routes (routesJson) and per-leg actor lists.
+  // Only fabricate display routes when the engine recorded none.
+  const base = enrichListItem(v2 as never) as CorridorDetailResponse;
+  const realRoutes = Array.isArray(v2.routes) ? (v2.routes as CorridorRouteResult[]) : [];
+  const routeResults = realRoutes.length > 0 ? realRoutes : base.routeResults;
+  const bestRouteId =
+    (v2.bestRouteId as string | null) ??
+    routeResults.find((r) => r.isWinner)?.routeId ??
+    routeResults[0]?.routeId ??
+    null;
+  const sourceActors = Array.isArray(v2.sourceActors) && v2.sourceActors.length > 0
+    ? (v2.sourceActors as CorridorDetailResponse["sourceActors"])
+    : base.sourceActors;
+  const destActors = Array.isArray(v2.destActors) && v2.destActors.length > 0
+    ? (v2.destActors as CorridorDetailResponse["destActors"])
+    : base.destActors;
   return {
-    ...(enrichListItem(v2 as never) as CorridorDetailResponse),
+    ...base,
     importance: (v2.importance as number) ?? 0,
     description: (v2.description as string) ?? "",
     useCase: (v2.useCase as string) ?? "",
     highlights: (v2.highlights as string[]) ?? [],
     amount: (v2.amount as string) ?? "0",
-    source: ((v2.source as CorridorAsset) ?? EMPTY_ASSET) as CorridorAsset,
-    dest: ((v2.dest as CorridorAsset) ?? EMPTY_ASSET) as CorridorAsset,
-    routes: (v2.routes as CorridorRouteCandidate[]) ?? [],
+    source: toAsset(v2.source),
+    dest: toAsset(v2.dest),
+    routes: routeResults as CorridorRouteCandidate[],
+    routeResults,
+    bestRouteId,
+    sourceActors,
+    destActors,
     aiNote: (v2.aiNote as string | null) ?? null,
     liquidity: null,
     flags: [],

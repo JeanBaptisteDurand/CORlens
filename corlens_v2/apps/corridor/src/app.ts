@@ -92,11 +92,17 @@ export async function buildApp(env: CorridorEnv): Promise<FastifyInstance> {
   await registerCurrencyMetaRoutes(app, currencyMetaService);
   await registerPartnerDepthRoutes(app, marketData);
   await registerChatRoutes(app, chat);
-  const actorCounts = new Map<string, number>();
+  const metaByCode = new Map<
+    string,
+    { issuers: Array<{ key?: string; name?: string; address?: string }>; actors: unknown[] }
+  >();
   for (const row of await currencyMetaRepo.list()) {
-    actorCounts.set(row.code, Array.isArray(row.actors) ? row.actors.length : 0);
+    metaByCode.set(row.code, {
+      issuers: Array.isArray(row.issuers) ? (row.issuers as never) : [],
+      actors: Array.isArray(row.actors) ? row.actors : [],
+    });
   }
-  await registerCorridorRoutes(app, corridors, events, actorCounts);
+  await registerCorridorRoutes(app, corridors, events, metaByCode);
   await registerAdminRoutes(app, corridors, events, scanner, currencyMetaRepo);
 
   const refresh = await startRefreshCron({

@@ -23,6 +23,26 @@ function assetCurrency(raw: unknown): string {
   return a?.currency ?? "";
 }
 
+type MetaEntry = {
+  issuers: Array<{ key?: string; name?: string; address?: string }>;
+  actors: unknown[];
+};
+
+// Real-world actors for a currency; currencies with no recorded actor
+// (e.g. CNY) fall back to their XRPL issuers presented as venues so the
+// detail page never shows an empty leg.
+function actorsFor(meta: MetaEntry | undefined): unknown[] {
+  if (meta?.actors?.length) return meta.actors;
+  return (meta?.issuers ?? []).map((i) => ({
+    key: i.key ?? i.address ?? "issuer",
+    name: i.name ?? i.key ?? "XRPL issuer",
+    type: "cex",
+    direction: "both",
+    supportsXrp: true,
+    note: "XRPL IOU issuer",
+  }));
+}
+
 function makeRowToList(actorCounts: Map<string, number>) {
   return (r: Awaited<ReturnType<CorridorRepo["list"]>>[number]) => ({
     id: r.id,
@@ -49,9 +69,11 @@ export async function registerCorridorRoutes(
   app: FastifyInstance,
   corridors: CorridorRepo,
   events: StatusEventRepo,
-  actorCounts: Map<string, number> = new Map(),
+  metaByCode: Map<string, MetaEntry> = new Map(),
 ): Promise<void> {
   const typed = app.withTypeProvider<ZodTypeProvider>();
+  const actorCounts = new Map<string, number>();
+  for (const [code, meta] of metaByCode) actorCounts.set(code, actorsFor(meta).length);
   const rowToList = makeRowToList(actorCounts);
 
   typed.get(
@@ -93,10 +115,13 @@ export async function registerCorridorRoutes(
         amount: r.amount,
         source: normalizeAsset(r.sourceJson) as never,
         dest: normalizeAsset(r.destJson) as never,
+        bestRouteId: r.bestRouteId,
         routes: (r.routesJson as unknown[]) ?? [],
         flags: Array.isArray(r.flagsJson) ? (r.flagsJson as unknown[]) : [],
         liquidity: r.liquidityJson,
         aiNote: r.aiNote,
+        sourceActors: actorsFor(metaByCode.get(assetCurrency(r.sourceJson))),
+        destActors: actorsFor(metaByCode.get(assetCurrency(r.destJson))),
       };
     },
   );
